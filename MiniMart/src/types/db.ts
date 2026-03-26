@@ -1,0 +1,29 @@
+export type Profile={
+    id:number
+    full_name:string | null
+    role: 'customer' | 'admin'
+    created_at:string
+}
+
+export type Product ={
+    id:string
+    name:string
+    description:string | null
+    price: number
+    stock_quantity: number
+    created_at: string
+}
+export type Order = {
+  id: string
+  user_id: string
+  status: 'pending' | 'confirmed' | 'fulfilled'
+  created_at: string
+}
+
+export type OrderItem = {
+  id: string
+  order_id: string
+  product_id: string
+  quantity: number
+  price_snapshot: number
+}
