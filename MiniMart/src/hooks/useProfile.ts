@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { getProfile } from '../Services/ProfileService'
 import type { Profile } from '../types/db'
+import { getProfile } from '../Services/ProfileService'
 import { useAuth } from './useAuth'
 
 export function useProfile() {
@@ -9,12 +9,26 @@ export function useProfile() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (!user) return
+    async function loadProfile() {
+      if (!user) {
+        setProfile(null)
+        setLoading(false)
+        return
+      }
 
-    getProfile()
-      .then(setProfile)
-      .catch(console.error)
-      .finally(() => setLoading(false))
+      try {
+        const data = await getProfile()
+        setProfile(data)
+      } catch (error) {
+        console.error(error)
+        setProfile(null)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    setLoading(true)
+    loadProfile()
   }, [user])
 
   return { profile, loading }
