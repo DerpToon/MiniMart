@@ -1,121 +1,169 @@
-import { useNavigate } from 'react-router-dom'
-import { useCart } from '../hooks/useCart'
-import { useOrder } from '../hooks/useOrder'
-import '../css/CartPage.css'
+import { Link, useNavigate } from 'react-router-dom';
+import { useCart } from '../hooks/useCart';
+import { useOrder } from '../hooks/useOrder';
+import '../css/CartPage.css';
 
 export default function CartPage() {
-  const { cart, addToCart, decreaseQuantity, removeFromCart, clearCart, getTotal } = useCart()
-  const { submitOrder, loading, error } = useOrder()
-  const navigate = useNavigate()
+    const { cart, addToCart, decreaseQuantity, removeFromCart, clearCart, getTotal } = useCart();
+    
+    // Using submitOrder from your hook
+    const { submitOrder, loading, error } = useOrder();
+    const navigate = useNavigate();
 
-  async function handleCheckout() {
-    if (cart.length === 0) return
+    const handleCheckout = async () => {
+        if (cart.length === 0) return;
 
-    try {
-      await submitOrder(cart)
-      clearCart()
-      navigate('/orders')
-    } catch (err) {
-      console.error(err)
-    }
-  }
+        try {
+            // 1. Calculate the final price (Subtotal + Shipping)
+            const subtotal = getTotal();
+            const shipping = subtotal > 50 ? 0 : 5.99;
+            const finalTotal = subtotal + shipping;
 
-  if (cart.length === 0) {
-    return (
-      <section className="cart-page">
-        <h1 className="cart-title">My Cart</h1>
-        <div className="cart-empty">
-          <p>Your cart is empty.</p>
-          <button className="cart-primary-button" onClick={() => navigate('/catalog')}>
-            Go to Catalog
-          </button>
-        </div>
-      </section>
-    )
-  }
+            // 2. FIXED: Use submitOrder from the hook and pass finalTotal
+            // This ensures the 'total' column in Supabase is filled
+            const orderId = await submitOrder(cart, finalTotal); 
+            
+            // 3. Success actions
+            clearCart();
+            alert("Checkout successful! Order ID: " + orderId);
+            navigate('/orders');
+        } catch (err: any) {
+            console.error("Checkout error:", err);
+            alert("Checkout failed: " + err.message);
+        }
+    };
 
-  return (
-    <section className="cart-page">
-      <h1 className="cart-title">My Cart</h1>
+    // UI Calculation Logic
+    const subtotal = getTotal();
+    const shipping = subtotal > 50 ? 0 : 5.99;
+    const finalTotal = subtotal + shipping;
 
-      <div className="cart-layout">
-        <div className="cart-items">
-          {cart.map((item) => (
-            <article className="cart-item" key={item.product_id}>
-              <img
-                className="cart-item-image"
-                src={item.image_url || 'https://via.placeholder.com/120x100?text=No+Image'}
-                alt={item.name}
-              />
-
-              <div className="cart-item-info">
-                <h2 className="cart-item-name">{item.name}</h2>
-                <p className="cart-item-price">${item.price.toFixed(2)}</p>
-
-                <div className="cart-item-actions">
-                  <button
-                    className="cart-qty-button"
-                    onClick={() => decreaseQuantity(item.product_id)}
-                  >
-                    -
-                  </button>
-
-                  <span className="cart-qty">{item.quantity}</span>
-
-                  <button
-                    className="cart-qty-button"
-                    onClick={() =>
-                      addToCart({
-                        product_id: item.product_id,
-                        name: item.name,
-                        price: item.price,
-                        quantity: 1,
-                        image_url: item.image_url
-                      })
-                    }
-                  >
-                    +
-                  </button>
-
-                  <button
-                    className="cart-remove-button"
-                    onClick={() => removeFromCart(item.product_id)}
-                  >
-                    Remove
-                  </button>
+    if (cart.length === 0) {
+        return (
+            <div className="cart-page empty-cart">
+                <div className="empty-cart-content">
+                    <span className="empty-icon">🛒</span>
+                    <h2>Your cart is empty</h2>
+                    <p>Looks like you haven't added any fresh groceries yet.</p>
+                    <button className="btn-continue-shopping" onClick={() => navigate('/catalog')}>
+                        Start Shopping
+                    </button>
                 </div>
-              </div>
+            </div>
+        );
+    }
 
-              <div className="cart-item-subtotal">
-                ${(item.price * item.quantity).toFixed(2)}
-              </div>
-            </article>
-          ))}
+    return (
+        <div className="cart-page">
+            <div className="cart-container">
+                <h1 className="cart-title">My Cart</h1>
+                
+                <div className="cart-layout">
+                    <div className="cart-items-section">
+                        <div className="cart-header">
+                            <span>Product</span>
+                            <span>Quantity</span>
+                            <span>Total</span>
+                        </div>
+
+                        {cart.map((item) => (
+                            <div key={item.product_id} className="cart-item">
+                                <div className="item-info">
+                                    <div className="item-image">
+                                        <img 
+                                            src={item.image_url || 'https://via.placeholder.com/100?text=📦'} 
+                                            alt={item.name} 
+                                        />
+                                    </div>
+                                    <div className="item-details">
+                                        <h3>{item.name}</h3>
+                                        <p className="item-price">${item.price.toFixed(2)}</p>
+                                    </div>
+                                </div>
+
+                                <div className="item-quantity">
+                                    <button 
+                                        className="qty-btn"
+                                        onClick={() => decreaseQuantity(item.product_id)}
+                                        disabled={item.quantity <= 1}
+                                    >
+                                        -
+                                    </button>
+                                    
+                                    <span className="qty-number">{item.quantity}</span>
+                                    
+                                    <button 
+                                        className="qty-btn"
+                                        onClick={() => addToCart({
+                                            product_id: item.product_id,
+                                            name: item.name,
+                                            price: item.price,
+                                            quantity: 1,
+                                            image_url: item.image_url
+                                        })}
+                                    >
+                                        +
+                                    </button>
+                                </div>
+
+                                <div className="item-total-price">
+                                    ${(item.price * item.quantity).toFixed(2)}
+                                    <button 
+                                        className="remove-btn"
+                                        onClick={() => removeFromCart(item.product_id)}
+                                        title="Remove item"
+                                    >
+                                        🗑️
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="cart-summary-section">
+                        <div className="summary-card">
+                            <h2>Order Summary</h2>
+                            
+                            <div className="summary-row">
+                                <span>Subtotal</span>
+                                <span>${subtotal.toFixed(2)}</span>
+                            </div>
+                            
+                            <div className="summary-row">
+                                <span>Shipping</span>
+                                <span>{shipping === 0 ? <span className="free-shipping">Free</span> : `$${shipping.toFixed(2)}`}</span>
+                            </div>
+
+                            {shipping > 0 && (
+                                <div className="shipping-hint">
+                                    Add ${(50 - subtotal).toFixed(2)} more to get free shipping!
+                                </div>
+                            )}
+
+                            <div className="summary-divider"></div>
+
+                            <div className="summary-row total-row">
+                                <span>Total</span>
+                                <span>${finalTotal.toFixed(2)}</span>
+                            </div>
+
+                            {error && <div className="cart-error-msg">⚠️ {error}</div>}
+
+                            <button 
+                                className="btn-checkout"
+                                onClick={handleCheckout}
+                                disabled={loading}
+                            >
+                                {loading ? 'Placing Order...' : 'Checkout'}
+                            </button>
+
+                            <button className="btn-clear-cart" onClick={clearCart}>
+                                Clear Cart
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-
-        <aside className="cart-summary">
-          <h2 className="cart-summary-title">Order Summary</h2>
-
-          <div className="cart-summary-row">
-            <span>Total</span>
-            <span>${getTotal().toFixed(2)}</span>
-          </div>
-
-          <button
-            className="cart-primary-button"
-            onClick={handleCheckout}
-            disabled={loading}
-          >
-            {loading ? 'Placing Order...' : 'Checkout'}
-          </button>
-
-          <button className="cart-secondary-button" onClick={clearCart}>
-            Clear Cart
-          </button>
-
-          {error && <p className="cart-error">{error}</p>}
-        </aside>
-      </div>
-    </section>
-  )
+    );
 }

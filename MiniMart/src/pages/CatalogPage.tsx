@@ -1,88 +1,88 @@
-import { useCart } from '../hooks/useCart'
-import { useProducts } from '../hooks/useProducts'
-import '../css/CatalogPage.css'
+import { useCart } from '../hooks/useCart'; // Adjust path
+import { useProducts } from '../hooks/useProducts'; // Adjust path
+import ProductCard from '../components/product/ProductCard'; // Adjust path to the new component
+import '../css/CatalogPage.css';
 
 export default function CatalogPage() {
-  const { products, loading, error } = useProducts()
-  const { addToCart } = useCart()
+    const { products, loading, error } = useProducts();
+    const { addToCart } = useCart();
 
-  function handleAddToCart(product: {
-    id: string
-    name: string
-    price: number
-    image_url: string | null
-    stock_quantity: number
-  }) {
-    if (product.stock_quantity <= 0) return
+    // Reusing the exact same type logic to prevent TypeScript errors
+    function handleAddToCart(product: {
+        id: string | number;
+        name: string;
+        price: number;
+        image_url?: string | null;
+        stock_quantity: number;
+    }) {
+        if (product.stock_quantity <= 0) return;
 
-    addToCart({
-      product_id: product.id,
-      name: product.name,
-      price: product.price,
-      quantity: 1,
-      image_url: product.image_url
-    })
-  }
+        addToCart({
+            product_id: String(product.id),
+            name: product.name,
+            price: product.price,
+            quantity: 1,
+            image_url: product.image_url || null
+        });
+    }
 
-  if (loading) {
-    return <p className="catalog-status">Loading products...</p>
-  }
-
-  if (error) {
-    return <p className="catalog-status catalog-error">{error}</p>
-  }
-
-  return (
-    <section className="catalog-page">
-      <div className="catalog-header">
-        <h1 className="catalog-title">Product Catalog</h1>
-        <p className="catalog-subtitle">Browse products and add them to your cart.</p>
-      </div>
-
-      <div className="catalog-grid">
-        {products.map((product) => (
-          <article className="product-card" key={product.id}>
-            <div className="product-image-wrapper">
-              <img
-                className="product-image"
-                src={product.image_url || 'https://via.placeholder.com/300x200?text=No+Image'}
-                alt={product.name}
-              />
+    // Loading State
+    if (loading) {
+        return (
+            <div className="catalog-page">
+                <div className="catalog-status-container">
+                    <p>Loading fresh products...</p>
+                </div>
             </div>
+        );
+    }
 
-            <div className="product-content">
-              <h2 className="product-name">{product.name}</h2>
-
-              <p className="product-description">
-                {product.description || 'No description available.'}
-              </p>
-
-              <div className="product-meta">
-                <span className="product-price">${product.price.toFixed(2)}</span>
-                <span
-                  className={
-                    product.stock_quantity > 0
-                      ? 'product-stock in-stock'
-                      : 'product-stock out-of-stock'
-                  }
-                >
-                  {product.stock_quantity > 0
-                    ? `In stock: ${product.stock_quantity}`
-                    : 'Out of stock'}
-                </span>
-              </div>
-
-              <button
-                className="product-button"
-                onClick={() => handleAddToCart(product)}
-                disabled={product.stock_quantity <= 0}
-              >
-                {product.stock_quantity > 0 ? 'Add to Cart' : 'Unavailable'}
-              </button>
+    // Error State
+    if (error) {
+        return (
+            <div className="catalog-page">
+                <div className="catalog-status-container error">
+                    <p>⚠️ {error}</p>
+                </div>
             </div>
-          </article>
-        ))}
-      </div>
-    </section>
-  )
+        );
+    }
+
+    return (
+        <section className="catalog-page">
+            <div className="catalog-container">
+                
+                {/* Header and Filters */}
+                <div className="catalog-header-bar">
+                    <div>
+                        <h1 className="catalog-title">All Categories</h1>
+                        <p className="catalog-subtitle">Browse our fresh selection and add to your cart.</p>
+                    </div>
+                    <div className="catalog-filters">
+                        <select className="filter-dropdown">
+                            <option>Sort by: Featured</option>
+                            <option>Price: Low to High</option>
+                            <option>Price: High to Low</option>
+                        </select>
+                    </div>
+                </div>
+
+                {/* Products Grid mapping over our new Reusable Component */}
+                <div className="catalog-grid">
+                    {products && products.length > 0 ? (
+                        products.map((product) => (
+                            <ProductCard 
+                                key={product.id} 
+                                product={product} 
+                                onAddToCart={handleAddToCart} 
+                            />
+                        ))
+                    ) : (
+                        <p className="no-products-message">No products found in the catalog.</p>
+                    )}
+                </div>
+                
+            </div>
+        </section>
+    );
 }

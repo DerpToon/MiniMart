@@ -27,6 +27,7 @@ export type Order = {
   id: string
   user_id: string
   status: 'pending' | 'confirmed' | 'fulfilled'
+  total:number;
   created_at: string
 }
 

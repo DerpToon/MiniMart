@@ -2,14 +2,16 @@ import { supabase } from '../lib/supabase'
 import type { CartItem } from '../types/cart'
 import type { Order, OrderItem } from '../types/db'
 
-export async function placeOrder(cart: CartItem[]): Promise<string> {
+// FIX: Service now accepts 'total' and sends it as 'p_total' to Supabase
+export async function placeOrder(cart: CartItem[], total: number): Promise<string> {
   const formattedItems = cart.map((item) => ({
     product_id: item.product_id,
     quantity: item.quantity
   }))
 
   const { data, error } = await supabase.rpc('place_order', {
-    p_items: formattedItems
+    p_items: formattedItems,
+    p_total: total 
   })
 
   if (error) throw error
@@ -27,7 +29,6 @@ export async function placeOrder(cart: CartItem[]): Promise<string> {
 
 export async function getMyOrders(): Promise<Order[]> {
   const { data, error } = await supabase.rpc('get_my_orders')
-
   if (error) throw error
   return data || []
 }
@@ -36,7 +37,6 @@ export async function getOrderItems(orderId: string): Promise<OrderItem[]> {
   const { data, error } = await supabase.rpc('get_order_items', {
     p_order_id: orderId
   })
-
   if (error) throw error
   return data || []
 }

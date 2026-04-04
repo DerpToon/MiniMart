@@ -1,0 +1,221 @@
+/* Footer.css */
+
+.footer-modern {
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    margin-top: 60px; /* Pushes it down from the main page content */
+    width: 100%;
+}
+
+.footer-container {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* --- Feature Banner (Light Green) --- */
+.footer-feature-banner {
+    background-color: #F0F6F4; /* Light fresh green matching your homepage buttons */
+    padding: 40px 0;
+    border-top: 1px solid #E0EDE9;
+}
+
+.feature-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    text-align: center;
+}
+
+.feature-item {
+    padding: 10px 20px;
+}
+
+.feature-icon {
+    font-size: 36px;
+    margin-bottom: 12px;
+}
+
+.feature-item h3 {
+    color: #175C4C;
+    font-size: 15px;
+    margin: 0 0 6px 0;
+    font-weight: 700;
+}
+
+.feature-item p {
+    color: #666;
+    font-size: 13px;
+    margin: 0;
+}
+
+/* --- Main Footer (Dark Teal) --- */
+.footer-main {
+    background-color: #175C4C; /* Dark Teal matching the Navbar */
+    color: white;
+    padding: 70px 0 50px 0;
+}
+
+.footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 50px;
+}
+
+/* Brand Area */
+.footer-brand {
+    padding-right: 30px;
+}
+
+.footer-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 24px;
+    font-weight: 800;
+    margin-bottom: 20px;
+    color: white;
+}
+
+.footer-logo img {
+    height: 40px;
+    width: 40px;
+    background: white;
+    border-radius: 50%;
+    padding: 2px;
+    object-fit: contain;
+}
+
+.footer-desc {
+    color: #A3D169; /* Accent Green */
+    font-size: 14px;
+    line-height: 1.7;
+    margin-bottom: 30px;
+    opacity: 0.9;
+}
+
+/* Payment Methods */
+.payment-methods span {
+    display: block;
+    font-size: 12px;
+    color: white;
+    margin-bottom: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.card-icons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.card-badge {
+    display: inline-block !important; /* Forces it to stay in line with text */
+    position: static !important;      /* Removes any 'absolute' behavior */
+    background: rgb(49, 23, 23);
+    color: #175C4C;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 4px 8px;
+    border-radius: 4px;
+    margin-left: 5px;
+    vertical-align: middle;
+}
+
+/* Links Area */
+.footer-links h4 {
+    color: white;
+    font-size: 16px;
+    margin: 0 0 25px 0;
+    font-weight: 600;
+}
+
+.footer-links a {
+    display: block;
+    color: #A3D169; /* Accent Green */
+    text-decoration: none;
+    font-size: 14px;
+    margin-bottom: 15px;
+    transition: all 0.2s ease;
+    opacity: 0.8;
+}
+
+.footer-links a:hover {
+    color: white;
+    opacity: 1;
+    transform: translateX(4px); /* Cute little slide effect on hover */
+}
+
+/* --- Bottom Bar --- */
+.footer-bottom {
+    background-color: #114337; /* Even darker Teal for the very bottom */
+    color: #88B953;
+    padding: 24px 0;
+    font-size: 13px;
+}
+
+.bottom-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.bottom-flex p {
+    margin: 0;
+}
+
+.bottom-links {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.bottom-links a {
+    color: #88B953;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.bottom-links a:hover {
+    color: white;
+}
+
+.bottom-links .divider {
+    color: #4A7A6C;
+}
+
+/* --- Responsiveness --- */
+@media (max-width: 1024px) {
+    .footer-grid {
+        grid-template-columns: 1.5fr 1fr 1fr; /* Drop one column, move brand to top */
+    }
+    .footer-brand {
+        grid-column: 1 / -1; /* Make brand span full width */
+        padding-right: 0;
+        margin-bottom: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .feature-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .footer-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .feature-grid {
+        grid-template-columns: 1fr;
+    }
+    .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 40px;
+    }
+    .bottom-flex {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+}

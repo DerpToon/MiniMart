@@ -1,0 +1,323 @@
+/* Home.css */
+
+.home-page {
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    background-color: #FAFAFA;
+    padding-bottom: 50px;
+}
+
+.home-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* --- 1. Hero Section --- */
+.hero-section {
+    background-color: #236B5B; /* Dark Teal from video */
+    border-radius: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 60px;
+    color: white;
+    margin-bottom: 40px;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-content {
+    max-width: 50%;
+    z-index: 2;
+}
+
+.hero-content h1 {
+    font-size: 3rem;
+    line-height: 1.1;
+    margin-bottom: 20px;
+    font-weight: 700;
+}
+
+.hero-content p {
+    font-size: 1rem;
+    opacity: 0.9;
+    margin-bottom: 30px;
+    max-width: 80%;
+}
+
+.btn-shop-now {
+    background-color: #A3D169; /* Light green button */
+    color: #11382F;
+    padding: 12px 30px;
+    border-radius: 30px;
+    text-decoration: none;
+    font-weight: 600;
+    display: inline-block;
+    transition: transform 0.2s;
+}
+
+.btn-shop-now:hover {
+    transform: translateY(-2px);
+}
+
+.placeholder-bag {
+    font-size: 100px;
+}
+
+/* --- 2. Categories Section --- */
+.categories-scroll {
+    display: flex;
+    gap: 15px;
+    overflow-x: auto;
+    padding-bottom: 20px;
+    margin-bottom: 30px;
+}
+
+.categories-scroll::-webkit-scrollbar {
+    display: none;
+}
+
+.category-card {
+    background: white;
+    border: 1px solid #EBEBEB;
+    border-radius: 12px;
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-width: 180px;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.category-card:hover {
+    border-color: #236B5B;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.cat-info h4 {
+    margin: 0 0 4px 0;
+    font-size: 14px;
+    color: #333;
+}
+
+.cat-info span {
+    font-size: 12px;
+    color: #888;
+}
+
+.cat-icon {
+    font-size: 24px;
+}
+
+.category-card.see-all {
+    background: #F0F6F4;
+    justify-content: center;
+    flex-direction: column;
+    min-width: 100px;
+    text-align: center;
+}
+
+.cat-icon-arrow {
+    background: #A3D169;
+    color: #11382F;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+}
+
+/* --- 3. Products Section --- */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.section-header h2 {
+    font-size: 1.5rem;
+    color: #222;
+}
+
+.see-more {
+    color: #D32F2F;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 20px;
+    margin-bottom: 60px;
+}
+
+.product-card {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+    position: relative;
+    transition: box-shadow 0.2s;
+}
+
+.product-card:hover {
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+.product-image-placeholder {
+    font-size: 60px;
+    margin-bottom: 15px;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #F8F8F8;
+    border-radius: 12px;
+}
+
+.product-card h3 {
+    font-size: 14px;
+    color: #333;
+    margin: 0 0 5px 0;
+    line-height: 1.3;
+    height: 36px;
+    overflow: hidden;
+}
+
+.product-card .weight {
+    font-size: 12px;
+    color: #999;
+    margin-bottom: 10px;
+}
+
+.price {
+    color: #333;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.price .currency { font-size: 14px; }
+.price .dollars { font-size: 20px; }
+.price .cents { font-size: 14px; vertical-align: top; }
+
+.add-btn {
+    background: #F0F6F4;
+    color: #236B5B;
+    border: none;
+    width: 100%;
+    padding: 8px 0;
+    border-radius: 8px;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.add-btn:hover {
+    background: #E0EDE9;
+}
+
+/* --- 4. Promo Banners --- */
+.promo-section {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-bottom: 60px;
+}
+
+.promo-card {
+    padding: 30px 20px;
+    border-radius: 16px;
+    text-align: left;
+}
+
+.promo-card h3 {
+    font-size: 16px;
+    color: #555;
+    margin-bottom: 5px;
+}
+
+.promo-card h2 {
+    font-size: 28px;
+    color: #222;
+    margin-bottom: 15px;
+}
+
+.promo-card p {
+    font-size: 12px;
+    color: #666;
+    line-height: 1.4;
+}
+
+/* --- 5. App Banner --- */
+.app-banner {
+    background-color: #611D3A; /* Magenta background */
+    border-radius: 24px;
+    padding: 50px 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+}
+
+.app-content h2 {
+    font-size: 2.2rem;
+    line-height: 1.3;
+    margin-bottom: 30px;
+}
+
+.app-buttons {
+    display: flex;
+    gap: 15px;
+}
+
+.store-btn {
+    background: black;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.app-image {
+    font-size: 120px;
+}
+
+/* --- Responsiveness --- */
+@media (max-width: 900px) {
+    .promo-section {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .hero-section {
+        flex-direction: column;
+        text-align: center;
+        padding: 40px 20px;
+    }
+    .hero-content {
+        max-width: 100%;
+        margin-bottom: 30px;
+    }
+}
+
+@media (max-width: 600px) {
+    .promo-section {
+        grid-template-columns: 1fr;
+    }
+    .app-banner {
+        flex-direction: column;
+        text-align: center;
+        padding: 40px 20px;
+    }
+    .app-buttons {
+        justify-content: center;
+    }
+}

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useRef } from 'react'
 import { useProducts } from '../hooks/useProducts'
 import {
   createProduct,
@@ -22,26 +22,87 @@ export default function AdminProductsPage() {
   const [selectedFile, setSelectedFile] = useState<File | undefined>(undefined)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const [submitting, setSubmitting] = useState(false)
-  const [message, setMessage] = useState('')
-  const [actionError, setActionError] = useState('')
+  
+  // Advanced Filter State
+  const [searchTerm, setSearchTerm] = useState('')
+  const [minPrice, setMinPrice] = useState<number>(0)
+  const [maxPrice, setMaxPrice] = useState<number>(500)
 
-  const pageTitle = useMemo(
-    () => (editingProduct ? 'Edit Product' : 'Add Product'),
-    [editingProduct]
-  )
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
-  function handleChange(
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) {
-    const { name, value } = e.target
+  const filteredProducts = useMemo(() => {
+    return products.filter(p => 
+      p.name.toLowerCase().includes(searchTerm.toLowerCase()) && 
+      p.price >= minPrice &&
+      p.price <= maxPrice
+    )
+  }, [products, searchTerm, minPrice, maxPrice])
 
-    setForm((prev) => ({
-      ...prev,
-      [name]:
-        name === 'price' || name === 'stock_quantity'
-          ? Number(value)
-          : value
-    }))
+  // --- SMART CREATE (Prevents Duplicates) ---
+  async function handleSmartCreate(data: ProductFormData, file?: File) {
+    const existing = products.find(p => p.name.toLowerCase() === data.name.toLowerCase());
+    if (existing) {
+      const newStock = existing.stock_quantity + data.stock_quantity;
+      await updateProduct(existing.id, {
+        name: existing.name,
+        description: existing.description || '',
+        price: existing.price,
+        stock_quantity: newStock,
+        image_url: existing.image_url || ''
+      });
+    } else {
+      await createProduct(data, file);
+    }
+  }
+
+  // --- BULK UPLOAD LOGIC ---
+  async function handleBulkUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const json = JSON.parse(event.target?.result as string);
+        if (!Array.isArray(json)) throw new Error("JSON must be an array");
+
+        setSubmitting(true);
+        for (const item of json) {
+          await handleSmartCreate({
+            name: item.name,
+            description: item.description || '',
+            price: Number(item.price),
+            stock_quantity: Number(item.stock_quantity || 0),
+            image_url: item.image_url || ''
+          });
+        }
+        alert("Bulk upload successful!");
+        window.location.reload();
+      } catch (err) {
+        alert("Error: Invalid JSON file format.");
+      } finally {
+        setSubmitting(false);
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    setSubmitting(true)
+    try {
+      if (editingProduct) {
+        await updateProduct(editingProduct.id, form, selectedFile)
+      } else {
+        await handleSmartCreate(form, selectedFile)
+      }
+      resetForm()
+      window.location.reload()
+    } catch (err: any) {
+      alert(err.message)
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   function handleEdit(product: Product) {
@@ -53,9 +114,7 @@ export default function AdminProductsPage() {
       stock_quantity: product.stock_quantity,
       image_url: product.image_url || ''
     })
-    setSelectedFile(undefined)
-    setMessage('')
-    setActionError('')
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   function resetForm() {
@@ -64,208 +123,128 @@ export default function AdminProductsPage() {
     setSelectedFile(undefined)
   }
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    setSubmitting(true)
-    setMessage('')
-    setActionError('')
-
-    try {
-      if (editingProduct) {
-        await updateProduct(editingProduct.id, form, selectedFile)
-        setMessage('Product updated successfully.')
-      } else {
-        await createProduct(form, selectedFile)
-        setMessage('Product created successfully.')
-      }
-
-      resetForm()
-      window.location.reload()
-    } catch (err: any) {
-      setActionError(err.message || 'Something went wrong.')
-    } finally {
-      setSubmitting(false)
-    }
-  }
-
-  async function handleDelete(productId: string) {
-    const confirmed = window.confirm('Are you sure you want to delete this product?')
-
-    if (!confirmed) return
-
-    setMessage('')
-    setActionError('')
-
-    try {
-      await deleteProduct(productId)
-      setMessage('Product deleted successfully.')
-      window.location.reload()
-    } catch (err: any) {
-      setActionError(err.message || 'Failed to delete product.')
-    }
-  }
-
   return (
-    <section className="admin-products-page">
-      <div className="admin-products-header">
-        <h1>Admin Products</h1>
-        <p>Manage your catalog here.</p>
-      </div>
-
-      <div className="admin-products-layout">
-        <form className="admin-products-form" onSubmit={handleSubmit}>
-          <h2>{pageTitle}</h2>
-
-          <label>
-            Name
-            <input
-              type="text"
-              name="name"
-              value={form.name}
-              onChange={handleChange}
-              required
-            />
-          </label>
-
-          <label>
-            Description
-            <textarea
-              name="description"
-              value={form.description}
-              onChange={handleChange}
-              rows={4}
-            />
-          </label>
-
-          <label>
-            Price
-            <input
-              type="number"
-              name="price"
-              value={form.price}
-              onChange={handleChange}
-              min="0"
-              step="0.01"
-              required
-            />
-          </label>
-
-          <label>
-            Stock Quantity
-            <input
-              type="number"
-              name="stock_quantity"
-              value={form.stock_quantity}
-              onChange={handleChange}
-              min="0"
-              required
-            />
-          </label>
-
-          <label>
-            Image URL
-            <input
-              type="text"
-              name="image_url"
-              value={form.image_url || ''}
-              onChange={handleChange}
-              placeholder="Optional public image URL"
-            />
-          </label>
-
-          <label>
-            Upload Image
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => setSelectedFile(e.target.files?.[0])}
-            />
-          </label>
-
-          <div className="admin-products-form__actions">
-            <button type="submit" disabled={submitting}>
-              {submitting
-                ? editingProduct
-                  ? 'Updating...'
-                  : 'Creating...'
-                : editingProduct
-                ? 'Update Product'
-                : 'Create Product'}
-            </button>
-
-            {editingProduct && (
-              <button
-                type="button"
-                className="secondary"
-                onClick={resetForm}
-              >
-                Cancel Edit
-              </button>
-            )}
+    <div className="admin-page">
+      <div className="admin-container">
+        
+        <header className="admin-dashboard-header">
+          <div className="title-area">
+            <h1>Inventory Dashboard</h1>
+            <span className="stats-badge">{products.length} Products Total</span>
           </div>
+          <div className="header-actions">
+            {/* HIDDEN FILE INPUT */}
+            <input 
+               type="file" 
+               ref={fileInputRef} 
+               onChange={handleBulkUpload} 
+               hidden 
+               accept=".json" 
+            />
+            <button className="btn-bulk-premium" onClick={() => fileInputRef.current?.click()}>
+              <span className="icon">📂</span> {submitting ? 'Uploading...' : 'Bulk Import JSON'}
+            </button>
+          </div>
+        </header>
 
-          {message && <p className="admin-products-success">{message}</p>}
-          {actionError && <p className="admin-products-error">{actionError}</p>}
-        </form>
-
-        <div className="admin-products-list">
-          <h2>All Products</h2>
-
-          {loading && <p>Loading products...</p>}
-          {error && <p className="admin-products-error">{error}</p>}
-
-          {!loading && !error && products.length === 0 && (
-            <p>No products found.</p>
-          )}
-
-          {!loading && !error && products.length > 0 && (
-            <div className="admin-products-table-wrapper">
-              <table className="admin-products-table">
-                <thead>
-                  <tr>
-                    <th>Image</th>
-                    <th>Name</th>
-                    <th>Price</th>
-                    <th>Stock</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {products.map((product) => (
-                    <tr key={product.id}>
-                      <td>
-                        <img
-                          className="admin-products-thumb"
-                          src={
-                            product.image_url ||
-                            'https://via.placeholder.com/70x70?text=No+Image'
-                          }
-                          alt={product.name}
-                        />
-                      </td>
-                      <td>{product.name}</td>
-                      <td>${product.price.toFixed(2)}</td>
-                      <td>{product.stock_quantity}</td>
-                      <td>
-                        <div className="admin-products-actions">
-                          <button onClick={() => handleEdit(product)}>Edit</button>
-                          <button
-                            className="danger"
-                            onClick={() => handleDelete(product.id)}
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+        <div className="admin-main-layout">
+          
+          <aside className="admin-sidebar">
+            <div className="admin-card sticky-form">
+              <h3 className="card-title">{editingProduct ? '📝 Edit Item' : '✨ New Product'}</h3>
+              <form onSubmit={handleSubmit} className="modern-form">
+                <div className="field">
+                  <label>Product Name</label>
+                  <input type="text" value={form.name} onChange={(e) => setForm({...form, name: e.target.value})} placeholder="e.g. Fuji Apples" required />
+                </div>
+                <div className="field-row">
+                  <div className="field">
+                    <label>Price ($)</label>
+                    <input type="number" value={form.price} onChange={(e) => setForm({...form, price: Number(e.target.value)})} step="0.01" required />
+                  </div>
+                  <div className="field">
+                    <label>Stock</label>
+                    <input type="number" value={form.stock_quantity} onChange={(e) => setForm({...form, stock_quantity: Number(e.target.value)})} required />
+                  </div>
+                </div>
+                <div className="field">
+                  <label>Image Upload</label>
+                  <input type="file" onChange={(e) => setSelectedFile(e.target.files?.[0])} />
+                </div>
+                <div className="form-actions">
+                  <button type="submit" className="btn-save-main" disabled={submitting}>
+                    {submitting ? 'Processing...' : editingProduct ? 'Save Changes' : 'Add to Catalog'}
+                  </button>
+                  {editingProduct && <button type="button" className="btn-cancel-flat" onClick={resetForm}>Discard</button>}
+                </div>
+              </form>
             </div>
-          )}
+          </aside>
+
+          <main className="admin-content">
+            <div className="admin-card no-padding">
+              
+              <div className="filter-panel">
+                <div className="search-group">
+                  <input 
+                    type="text" 
+                    placeholder="Search by name..." 
+                    value={searchTerm} 
+                    onChange={(e) => setSearchTerm(e.target.value)} 
+                  />
+                  <span className="search-icon">🔍</span>
+                </div>
+                
+                <div className="price-controls">
+                  <div className="range-input">
+                    <label>Min Price: ${minPrice}</label>
+                    <input type="range" min="0" max="100" value={minPrice} onChange={(e) => setMinPrice(Number(e.target.value))} />
+                  </div>
+                  <div className="range-input">
+                    <label>Max Price: ${maxPrice}</label>
+                    <input type="range" min="0" max="1000" value={maxPrice} onChange={(e) => setMaxPrice(Number(e.target.value))} />
+                  </div>
+                </div>
+              </div>
+
+              <div className="table-responsive-wrapper">
+                <table className="premium-table">
+                  <thead>
+                    <tr>
+                      <th>Item Details</th>
+                      <th>Unit Price</th>
+                      <th>Inventory</th>
+                      <th className="text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredProducts.map((product) => (
+                      <tr key={product.id}>
+                        <td>
+                          <div className="item-meta">
+                            <img src={product.image_url || 'https://via.placeholder.com/40'} alt="" />
+                            <span>{product.name}</span>
+                          </div>
+                        </td>
+                        <td className="price-cell">${product.price.toFixed(2)}</td>
+                        <td>
+                          <span className={`status-chip ${product.stock_quantity < 10 ? 'warning' : 'success'}`}>
+                            {product.stock_quantity} units
+                          </span>
+                        </td>
+                        <td className="text-right">
+                          <button className="btn-action edit" onClick={() => handleEdit(product)}>Edit</button>
+                          <button className="btn-action delete" onClick={() => deleteProduct(product.id).then(() => window.location.reload())}>Delete</button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </main>
         </div>
       </div>
-    </section>
+    </div>
   )
 }

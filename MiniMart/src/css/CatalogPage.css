@@ -1,0 +1,102 @@
+/* CatalogPage.css */
+
+.catalog-page {
+    background-color: #FAFAFA;
+    min-height: 80vh;
+    padding: 40px 0;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+
+.catalog-container {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* --- Header Area --- */
+.catalog-header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 40px;
+    border-bottom: 1px solid #EBEBEB;
+    padding-bottom: 20px;
+}
+
+.catalog-title {
+    font-size: 2rem;
+    color: #253D4E;
+    margin: 0 0 10px 0;
+    font-weight: 700;
+}
+
+.catalog-subtitle {
+    color: #7E7E7E;
+    margin: 0;
+    font-size: 15px;
+}
+
+.filter-dropdown {
+    padding: 10px 15px;
+    border: 1px solid #EBEBEB;
+    border-radius: 8px;
+    background: white;
+    color: #444;
+    font-weight: 600;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.filter-dropdown:hover {
+    border-color: #A3D169;
+}
+
+/* --- The Grid --- */
+.catalog-grid {
+    display: grid;
+    /* Matches the same width constraint we set on the homepage grid */
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 25px;
+}
+
+.no-products-message {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 50px 0;
+    color: #888;
+    font-size: 18px;
+}
+
+/* Loading/Error States */
+.catalog-status-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 50vh;
+    color: #666;
+    font-size: 18px;
+}
+
+.catalog-status-container.error {
+    color: #D32F2F;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 600px) {
+    .catalog-header-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 20px;
+    }
+    
+    .filter-dropdown {
+        width: 100%;
+    }
+    
+    .catalog-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); /* Smaller cards on mobile */
+        gap: 15px;
+    }
+}

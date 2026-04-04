@@ -6,11 +6,13 @@ export function useOrder() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  async function submitOrder(cart: CartItem[]): Promise<string> {
+  // FIX: Added 'total' parameter here so the Cart Page can pass the price
+  async function submitOrder(cart: CartItem[], total: number): Promise<string> {
     setLoading(true)
     setError(null)
     try {
-      const orderId = await placeOrder(cart)
+      // FIX: Passing both cart and total to the service
+      const orderId = await placeOrder(cart, total)
       return orderId
     } catch (err: any) {
       setError(err.message)

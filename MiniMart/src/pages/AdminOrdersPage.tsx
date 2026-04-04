@@ -1,113 +1,151 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { getAllOrders, updateOrderStatus } from '../Services/OrderService'
 import type { Order } from '../types/db'
+import { 
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Legend 
+} from 'recharts'
 import '../css/AdminOrdersPage.css'
-
-function formatDate(dateString: string) {
-  return new Date(dateString).toLocaleString()
-}
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-  const [message, setMessage] = useState('')
 
   useEffect(() => {
     async function loadOrders() {
-      setLoading(true)
-      setError('')
-
       try {
         const data = await getAllOrders()
         setOrders(data)
-      } catch (err: any) {
-        setError(err.message || 'Failed to load orders.')
+      } catch (err) {
+        console.error(err)
       } finally {
         setLoading(false)
       }
     }
-
     loadOrders()
   }, [])
 
-  async function handleStatusChange(
-    orderId: string,
-    status: Order['status']
-  ) {
-    setError('')
-    setMessage('')
+  const stats = useMemo(() => {
+    const totalRevenue = orders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+    
+    // Chart data for last 7 days
+    const last7Days = [...Array(7)].map((_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toISOString().split('T')[0];
+      
+      const dayOrders = orders.filter(o => o.created_at.startsWith(dateStr));
+      const dayTotalRevenue = dayOrders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+      const dayOrderCount = dayOrders.length; // Counting the number of orders
+      
+      return { 
+        name: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }), 
+        revenue: dayTotalRevenue,
+        orderCount: dayOrderCount // Added for the second graph
+      };
+    }).reverse();
 
-    try {
-      const updatedOrder = await updateOrderStatus(orderId, status)
+    return { totalRevenue, chartData: last7Days };
+  }, [orders]);
 
-      setOrders((prev) =>
-        prev.map((order) =>
-          order.id === updatedOrder.id ? updatedOrder : order
-        )
-      )
-
-      setMessage('Order status updated successfully.')
-    } catch (err: any) {
-      setError(err.message || 'Failed to update order status.')
-    }
-  }
+  if (loading) return <div className="admin-loader">Syncing Business Data...</div>;
 
   return (
-    <section className="admin-orders-page">
-      <div className="admin-orders-header">
-        <h1>Admin Orders</h1>
-        <p>Review and manage customer orders.</p>
-      </div>
+    <div className="admin-orders-container">
+      <div className="admin-wrapper">
+        <header className="admin-dashboard-header">
+          <div>
+            <h1>Business Overview</h1>
+            <p>Real-time analytics for your MiniMart store.</p>
+          </div>
+          <div className="revenue-hero-card">
+             <span className="label">Total Gross Revenue</span>
+             <h2 className="value">${stats.totalRevenue.toFixed(2)}</h2>
+          </div>
+        </header>
 
-      {message && <p className="admin-orders-success">{message}</p>}
-      {error && <p className="admin-orders-error">{error}</p>}
+        {/* --- Analytics Section with Two Graphs --- */}
+        <section className="analytics-grid">
+          
+          {/* Revenue Bar Chart */}
+          <div className="chart-card">
+            <h3>Daily Revenue (USD)</h3>
+            <div style={{ width: '100%', height: 250 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={stats.chartData}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 12}} />
+                  <YAxis axisLine={false} tickLine={false} tick={{fontSize: 12}} />
+                  <Tooltip cursor={{fill: '#f8fafc'}} contentStyle={{borderRadius: '12px', border: 'none'}} />
+                  <Bar dataKey="revenue" fill="#3bb77e" radius={[6, 6, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
 
-      {loading ? (
-        <p>Loading orders...</p>
-      ) : orders.length === 0 ? (
-        <div className="admin-orders-empty">
-          <p>No orders found.</p>
-        </div>
-      ) : (
-        <div className="admin-orders-table-wrapper">
+          {/* Order Progress Line Chart */}
+          <div className="chart-card">
+            <h3>Order Volume Progress</h3>
+            <div style={{ width: '100%', height: 250 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={stats.chartData}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 12}} />
+                  <YAxis axisLine={false} tickLine={false} tick={{fontSize: 12}} />
+                  <Tooltip contentStyle={{borderRadius: '12px', border: 'none'}} />
+                  <Legend />
+                  <Line 
+                    type="monotone" 
+                    dataKey="orderCount" 
+                    name="Orders Per Day"
+                    stroke="#2563eb" 
+                    strokeWidth={3} 
+                    dot={{ r: 6, fill: '#2563eb' }}
+                    activeDot={{ r: 8 }} 
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+        </section>
+
+        {/* --- Orders Management Table --- */}
+        <section className="orders-table-card">
+          <div className="card-header">
+            <h3>Live Order Management</h3>
+          </div>
           <table className="admin-orders-table">
             <thead>
               <tr>
-                <th>Order ID</th>
-                <th>User ID</th>
+                <th>Order Ref</th>
+                <th>Date</th>
+                <th>Amount</th>
                 <th>Status</th>
-                <th>Created At</th>
               </tr>
             </thead>
-
             <tbody>
               {orders.map((order) => (
                 <tr key={order.id}>
-                  <td>{order.id.slice(0, 8)}</td>
-                  <td>{order.user_id.slice(0, 8)}</td>
+                  <td className="order-id">#{order.id.slice(0, 8)}</td>
+                  <td>{new Date(order.created_at).toLocaleDateString()}</td>
+                  <td className="total-amount">${(Number(order.total) || 0).toFixed(2)}</td>
                   <td>
                     <select
+                      className={`status-pill ${order.status}`}
                       value={order.status}
-                      onChange={(e) =>
-                        handleStatusChange(
-                          order.id,
-                          e.target.value as Order['status']
-                        )
-                      }
+                      onChange={(e) => updateOrderStatus(order.id, e.target.value as any).then(() => window.location.reload())}
                     >
-                      <option value="pending">pending</option>
-                      <option value="confirmed">confirmed</option>
-                      <option value="fulfilled">fulfilled</option>
+                      <option value="pending">Pending</option>
+                      <option value="confirmed">Confirmed</option>
+                      <option value="fulfilled">Fulfilled</option>
                     </select>
                   </td>
-                  <td>{formatDate(order.created_at)}</td>
                 </tr>
               ))}
             </tbody>
           </table>
-        </div>
-      )}
-    </section>
+        </section>
+      </div>
+    </div>
   )
 }
