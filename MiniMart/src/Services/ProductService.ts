@@ -82,10 +82,32 @@ export async function updateProduct(
 }
 
 export async function deleteProduct(productId: string): Promise<void> {
+  // Check if product has any orders
+  const { data: orderItems, error: checkError } = await supabase
+    .from('order_items')
+    .select('id')
+    .eq('product_id', productId)
+    .limit(1)
+
+  if (checkError) throw checkError
+
+  if (orderItems && orderItems.length > 0) {
+    throw new Error(
+      'Cannot delete this product because it has existing orders. You can set the stock quantity to 0 to make it unavailable instead.'
+    )
+  }
+
   const { error } = await supabase
     .from('products')
     .delete()
     .eq('id', productId)
 
-  if (error) throw error
+  if (error) {
+    if (error.code === '23503') {
+      throw new Error(
+        'Cannot delete this product because it has existing orders. You can set the stock quantity to 0 to make it unavailable instead.'
+      )
+    }
+    throw error
+  }
 }

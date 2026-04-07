@@ -1,12 +1,75 @@
-/* Add this to the very top of index.css */
+:root {
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: #12312b;
+  background: #f7faf7;
+  line-height: 1.5;
+  font-weight: 400;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  --bg: #f7faf7;
+  --surface: #ffffff;
+  --surface-soft: #f0f6f2;
+  --surface-alt: #f7fbf8;
+  --text: #16342e;
+  --text-soft: #5f746e;
+  --heading: #102822;
+  --primary: #1b6b59;
+  --primary-dark: #145142;
+  --primary-soft: #e5f4ef;
+  --accent: #b7de72;
+  --accent-strong: #94c84f;
+  --danger: #dc4d4d;
+  --danger-soft: #fff1f1;
+  --warning: #f59e0b;
+  --border: #dce8df;
+  --shadow-sm: 0 8px 24px rgba(18, 49, 43, 0.06);
+  --shadow-md: 0 18px 40px rgba(18, 49, 43, 0.1);
+  --radius-lg: 24px;
+  --radius-md: 18px;
+  --radius-sm: 12px;
+  --container: 1200px;
+}
+
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-    margin: 0;
-    padding: 0;
-    overflow-x: hidden; /* Prevents horizontal scrolling */
+  margin: 0;
+  min-width: 320px;
+  background:
+    radial-gradient(circle at top left, rgba(183, 222, 114, 0.18), transparent 22%),
+    linear-gradient(180deg, #f8fcf9 0%, #f3f8f5 100%);
+  color: var(--text);
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+#root {
+  min-height: 100vh;
 }

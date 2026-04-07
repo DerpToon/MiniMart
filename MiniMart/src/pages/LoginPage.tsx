@@ -24,56 +24,60 @@ export default function LoginPage() {
   }
 
   return (
-    <section className="login-page">
-      <div className="login-card">
-        <h1 className="login-title">Welcome back</h1>
-        <p className="login-subtitle">Sign in to continue to MiniMart</p>
+    <section className="auth-page">
+      <div className="auth-layout">
+        <div className="auth-side-panel">
+          <span className="auth-side-badge">Welcome back</span>
+          <h1>Login to continue shopping on MiniMart.</h1>
+          <p>
+            Access your cart, place orders, and manage your account with the refreshed MiniMart UI.
+          </p>
+          <ul>
+            <li>Track existing orders</li>
+            <li>Use your saved account</li>
+            <li>Continue from cart to checkout</li>
+          </ul>
+        </div>
 
-        <form className="login-form" onSubmit={handleSubmit}>
-          <div className="login-field">
-            <label className="login-label" htmlFor="login-email">
-              Email
+        <div className="auth-card">
+          <h2>Login</h2>
+          <p className="auth-subtitle">Enter your account details below.</p>
+
+          <form className="auth-form" onSubmit={handleSubmit}>
+            <label className="auth-field">
+              <span>Email</span>
+              <input
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
             </label>
-            <input
-              id="login-email"
-              className="login-input"
-              type="email"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
 
-          <div className="login-field">
-            <label className="login-label" htmlFor="login-password">
-              Password
+            <label className="auth-field">
+              <span>Password</span>
+              <input
+                type="password"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
             </label>
-            <input
-              id="login-password"
-              className="login-input"
-              type="password"
-              placeholder="Enter your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
 
-          <button className="login-button" type="submit" disabled={loading}>
-            {loading ? 'Logging in...' : 'Login'}
-          </button>
-        </form>
+            <button className="auth-submit" type="submit" disabled={loading}>
+              {loading ? 'Logging in...' : 'Login'}
+            </button>
+          </form>
 
-        {error && <p className="login-error">{error}</p>}
-        {successMessage && <p className="login-success">{successMessage}</p>}
+          {error && <div className="auth-message error">{error}</div>}
+          {successMessage && <div className="auth-message success">{successMessage}</div>}
 
-        <p className="login-footer">
-          Don&apos;t have an account?{' '}
-          <Link className="login-link" to="/register">
-            Register
-          </Link>
-        </p>
+          <p className="auth-footer-text">
+            Don&apos;t have an account? <Link to="/register">Create one</Link>
+          </p>
+        </div>
       </div>
     </section>
   )

@@ -5,6 +5,21 @@ export type Profile = {
   created_at: string
 }
 
+export type ProfileFormData = {
+  full_name: string
+  email: string
+  new_password: string
+  confirm_password: string
+}
+
+export type ProfileView = {
+  id: string
+  full_name: string | null
+  email: string
+  role: 'customer' | 'admin'
+  created_at: string
+}
+
 export type Product = {
   id: string
   name: string
@@ -27,7 +42,7 @@ export type Order = {
   id: string
   user_id: string
   status: 'pending' | 'confirmed' | 'fulfilled'
-  total:number;
+  total: number
   created_at: string
 }
 
@@ -37,4 +52,5 @@ export type OrderItem = {
   product_id: string
   quantity: number
   price_snapshot: number
+  product_name?: string | null
 }

@@ -8,16 +8,21 @@ export function useOrderItems(orderId: string) {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!orderId) return
+    if (!orderId) {
+      setItems([])
+      setLoading(false)
+      return
+    }
 
     async function fetchItems() {
       setLoading(true)
       setError(null)
+
       try {
         const data = await getOrderItems(orderId)
         setItems(data)
       } catch (err: any) {
-        setError(err.message)
+        setError(err.message || 'Failed to load order items.')
       } finally {
         setLoading(false)
       }

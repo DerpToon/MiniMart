@@ -7,6 +7,7 @@ import RegisterPage from '../pages/RegisterPage'
 import CatalogPage from '../pages/CatalogPage'
 import OrdersPage from '../pages/OrdersPage'
 import CartPage from '../pages/CartPage'
+import ProfilePage from '../pages/ProfilePage'
 import NotFoundPage from '../pages/NotFoundPage'
 
 import AdminProductsPage from '../pages/AdminProductsPage'
@@ -14,6 +15,7 @@ import AdminOrdersPage from '../pages/AdminOrdersPage'
 
 import ProtectedRoute from '../components/ProtectedRoute'
 import AdminRoute from '../components/AdminRoute'
+import GuestOnlyRoute from '../components/GuestOnlyRoute'
 
 export const router = createBrowserRouter([
   {
@@ -22,19 +24,40 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <HomePage /> },
 
-      { path: 'login', element: <LoginPage /> },
-      { path: 'register', element: <RegisterPage /> },
+      {
+        path: 'login',
+        element: (
+          <GuestOnlyRoute>
+            <LoginPage />
+          </GuestOnlyRoute>
+        )
+      },
+      {
+        path: 'register',
+        element: (
+          <GuestOnlyRoute>
+            <RegisterPage />
+          </GuestOnlyRoute>
+        )
+      },
 
       { path: 'catalog', element: <CatalogPage /> },
 
-      // 🔐 USER PROTECTED
+      {
+        path: 'profile',
+        element: (
+          <ProtectedRoute>
+            <ProfilePage />
+          </ProtectedRoute>
+        )
+      },
       {
         path: 'orders',
         element: (
           <ProtectedRoute>
             <OrdersPage />
           </ProtectedRoute>
-        ),
+        )
       },
       {
         path: 'cart',
@@ -42,17 +65,16 @@ export const router = createBrowserRouter([
           <ProtectedRoute>
             <CartPage />
           </ProtectedRoute>
-        ),
+        )
       },
 
-      // 🔐 ADMIN ONLY
       {
         path: 'admin/products',
         element: (
           <AdminRoute>
             <AdminProductsPage />
           </AdminRoute>
-        ),
+        )
       },
       {
         path: 'admin/orders',
@@ -60,10 +82,10 @@ export const router = createBrowserRouter([
           <AdminRoute>
             <AdminOrdersPage />
           </AdminRoute>
-        ),
+        )
       },
 
-      { path: '*', element: <NotFoundPage /> },
-    ],
-  },
+      { path: '*', element: <NotFoundPage /> }
+    ]
+  }
 ])

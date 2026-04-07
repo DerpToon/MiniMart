@@ -7,59 +7,32 @@ function formatDate(dateString: string) {
 }
 
 function getStatusClass(status: string) {
-  if (status === 'pending') return 'orders-status orders-status--pending'
-  if (status === 'confirmed') return 'orders-status orders-status--confirmed'
-  return 'orders-status orders-status--fulfilled'
+  if (status === 'pending') return 'order-status pending'
+  if (status === 'confirmed') return 'order-status confirmed'
+  return 'order-status fulfilled'
 }
 
-function OrderCard({
-  orderId,
-  createdAt,
-  status
-}: {
-  orderId: string
-  createdAt: string
-  status: 'pending' | 'confirmed' | 'fulfilled'
-}) {
+function OrderItems({ orderId }: { orderId: string }) {
   const { items, loading, error } = useOrderItems(orderId)
 
+  if (loading) return <p className="orders-muted">Loading order items...</p>
+  if (error) return <p className="orders-error">{error}</p>
+  if (items.length === 0) return <p className="orders-muted">No items found for this order.</p>
+
   return (
-    <article className="orders-card">
-      <div className="orders-card__header">
-        <div>
-          <h2 className="orders-card__title">Order #{orderId.slice(0, 8)}</h2>
-          <p className="orders-card__date">{formatDate(createdAt)}</p>
-        </div>
-
-        <span className={getStatusClass(status)}>{status}</span>
-      </div>
-
-      <div className="orders-card__body">
-        {loading && <p className="orders-muted">Loading order items...</p>}
-        {error && <p className="orders-error">{error}</p>}
-
-        {!loading && !error && items.length === 0 && (
-          <p className="orders-muted">No items found for this order.</p>
-        )}
-
-        {!loading && !error && items.length > 0 && (
-          <div className="orders-items">
-            {items.map((item) => (
-              <div className="orders-item" key={item.id}>
-                <div>
-                  <p className="orders-item__name">Product ID: {item.product_id.slice(0, 8)}</p>
-                  <p className="orders-item__meta">Quantity: {item.quantity}</p>
-                </div>
-
-                <p className="orders-item__price">
-                  ${(item.price_snapshot * item.quantity).toFixed(2)}
-                </p>
-              </div>
-            ))}
+    <div className="order-items-list">
+      {items.map((item) => (
+        <div className="order-item-row" key={item.id}>
+          <div>
+            <strong className="order-item-name">{item.product_name || 'Unnamed product'}</strong>
+            <span className="order-item-qty">Quantity: {item.quantity}</span>
           </div>
-        )}
-      </div>
-    </article>
+          <strong className="order-item-subtotal">
+            ${(item.price_snapshot * item.quantity).toFixed(2)}
+          </strong>
+        </div>
+      ))}
+    </div>
   )
 }
 
@@ -67,36 +40,58 @@ export default function OrdersPage() {
   const { orders, loading, error } = useOrders()
 
   if (loading) {
-    return <p className="orders-state">Loading your orders...</p>
+    return (
+      <section className="orders-page">
+        <div className="orders-container">
+          <div className="orders-state">Loading your orders...</div>
+        </div>
+      </section>
+    )
   }
 
   if (error) {
-    return <p className="orders-state orders-error">{error}</p>
+    return (
+      <section className="orders-page">
+        <div className="orders-container">
+          <div className="orders-state error">{error}</div>
+        </div>
+      </section>
+    )
   }
 
   return (
     <section className="orders-page">
-      <div className="orders-header">
-        <h1 className="orders-page__title">My Orders</h1>
-        <p className="orders-page__subtitle">Track the status of your orders here.</p>
-      </div>
+      <div className="orders-container">
+        <div className="orders-header">
+          <p className="orders-kicker">Orders</p>
+          <h1>Track your purchases</h1>
+          <p className="orders-subtitle">Review each order, its status, and the items included.</p>
+        </div>
 
-      {orders.length === 0 ? (
-        <div className="orders-empty">
-          <p>You have not placed any orders yet.</p>
-        </div>
-      ) : (
-        <div className="orders-list">
-          {orders.map((order) => (
-            <OrderCard
-              key={order.id}
-              orderId={order.id}
-              createdAt={order.created_at}
-              status={order.status}
-            />
-          ))}
-        </div>
-      )}
+        {orders.length === 0 ? (
+          <div className="orders-empty-card">You have not placed any orders yet.</div>
+        ) : (
+          <div className="orders-list">
+            {orders.map((order) => (
+              <article className="order-card" key={order.id}>
+                <div className="order-card-header">
+                  <div>
+                    <h2>Order #{order.id.slice(0, 8)}</h2>
+                    <p>{formatDate(order.created_at)}</p>
+                  </div>
+
+                  <div className="order-card-meta">
+                    <span className={getStatusClass(order.status)}>{order.status}</span>
+                    <strong>${(Number(order.total) || 0).toFixed(2)}</strong>
+                  </div>
+                </div>
+
+                <OrderItems orderId={order.id} />
+              </article>
+            ))}
+          </div>
+        )}
+      </div>
     </section>
   )
 }
