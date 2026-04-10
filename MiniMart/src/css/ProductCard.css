@@ -54,6 +54,21 @@
   padding: 1.15rem;
 }
 
+.product-card-media-link,
+.product-card-info-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.product-card-media-link {
+  display: block;
+}
+
+.product-card-info-link:hover h3 {
+  text-decoration: underline;
+}
+
 .product-card-kicker {
   margin: 0;
   color: var(--text-soft);

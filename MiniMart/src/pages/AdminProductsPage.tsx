@@ -1,19 +1,24 @@
 import { useMemo, useRef, useState } from 'react'
+import { useCategories } from '../hooks/useCategories'
 import { useProducts } from '../hooks/useProducts'
 import { createProduct, deleteProduct, updateProduct } from '../Services/ProductService'
-import type { Product, ProductFormData } from '../types/db'
+import type { Category, Product, ProductFormData } from '../types/db'
 import '../css/AdminProductsPage.css'
+
+const fallbackCategoryOptions = ['Vegetables', 'Fruits', 'Dairy', 'Bakery', 'Pantry', 'Snacks']
 
 const initialForm: ProductFormData = {
   name: '',
   description: '',
   price: 0,
   stock_quantity: 0,
-  image_url: ''
+  image_url: '',
+  category_id: ''
 }
 
 export default function AdminProductsPage() {
   const { products, loading, error } = useProducts()
+  const { categories, loading: categoriesLoading } = useCategories()
   const [form, setForm] = useState<ProductFormData>(initialForm)
   const [selectedFile, setSelectedFile] = useState<File | undefined>(undefined)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
@@ -21,16 +26,25 @@ export default function AdminProductsPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [minPrice, setMinPrice] = useState(0)
   const [maxPrice, setMaxPrice] = useState(500)
+  const [selectedCategory, setSelectedCategory] = useState('All')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  const availableCategories = useMemo(() => {
+    const categoryNames = categories.map((category) => category.name)
+    return ['All', ...Array.from(new Set([...fallbackCategoryOptions, ...categoryNames]))]
+  }, [categories])
+
   const filteredProducts = useMemo(() => {
-    return products.filter(
-      (product) =>
-        product.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        product.price >= minPrice &&
-        product.price <= maxPrice
-    )
-  }, [products, searchTerm, minPrice, maxPrice])
+    return products.filter((product) => {
+      const matchesName = product.name.toLowerCase().includes(searchTerm.toLowerCase())
+      const matchesPrice = product.price >= minPrice && product.price <= maxPrice
+      const matchesCategory =
+        selectedCategory === 'All' ||
+        (product.category?.name === selectedCategory)
+
+      return matchesName && matchesPrice && matchesCategory
+    })
+  }, [products, searchTerm, minPrice, maxPrice, selectedCategory])
 
   async function handleSmartCreate(data: ProductFormData, file?: File) {
     const existing = products.find((product) => product.name.toLowerCase() === data.name.toLowerCase())
@@ -41,8 +55,9 @@ export default function AdminProductsPage() {
         description: existing.description || '',
         price: existing.price,
         stock_quantity: existing.stock_quantity + data.stock_quantity,
-        image_url: existing.image_url || ''
-      })
+        image_url: existing.image_url || '',
+        category_id: data.category_id ?? existing.category_id ?? null
+      }, file)
       return
     }
 
@@ -66,7 +81,8 @@ export default function AdminProductsPage() {
             description: item.description || '',
             price: Number(item.price),
             stock_quantity: Number(item.stock_quantity || 0),
-            image_url: item.image_url || ''
+            image_url: item.image_url || '',
+            category_id: item.category_id || item.category || null
           })
         }
         alert('Bulk upload successful!')
@@ -106,7 +122,8 @@ export default function AdminProductsPage() {
       description: product.description || '',
       price: product.price,
       stock_quantity: product.stock_quantity,
-      image_url: product.image_url || ''
+      image_url: product.image_url || '',
+      category_id: product.category?.id ?? ''
     })
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -219,6 +236,22 @@ export default function AdminProductsPage() {
               </div>
 
               <label>
+                <span>Category</span>
+                <select
+                  value={form.category_id || ''}
+                  onChange={(e) => setForm({ ...form, category_id: e.target.value })}
+                  required
+                >
+                  <option value="">Select category</option>
+                  {(categories.length > 0 ? categories : fallbackCategoryOptions.map((name) => ({ id: name, name, slug: name.toLowerCase() }))).map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label>
                 <span>Product image</span>
                 <input type="file" onChange={(e) => setSelectedFile(e.target.files?.[0])} />
               </label>
@@ -257,6 +290,16 @@ export default function AdminProductsPage() {
                   <span>Max: ${maxPrice}</span>
                   <input type="range" min="0" max="1000" value={maxPrice} onChange={(e) => setMaxPrice(Number(e.target.value))} />
                 </label>
+                <label>
+                  <span>Category</span>
+                  <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)}>
+                    {availableCategories.map((category) => (
+                      <option key={category} value={category}>
+                        {category}
+                      </option>
+                    ))}
+                  </select>
+                </label>
               </div>
             </div>
 
@@ -266,6 +309,7 @@ export default function AdminProductsPage() {
                   <tr>
                     <th>Product</th>
                     <th>Description</th>
+                    <th>Category</th>
                     <th>Price</th>
                     <th>Stock</th>
                     <th>Actions</th>
@@ -287,6 +331,7 @@ export default function AdminProductsPage() {
                         </div>
                       </td>
                       <td className="admin-desc-cell">{product.description || '—'}</td>
+                      <td>{product.category?.name || 'Uncategorized'}</td>
                       <td className="admin-price-cell">${product.price.toFixed(2)}</td>
                       <td>
                         <span className={`admin-stock-chip ${product.stock_quantity <= 8 ? 'low' : 'ok'}`}>

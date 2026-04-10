@@ -1,14 +1,6 @@
+import { Link } from 'react-router-dom'
 import '../../css/ProductCard.css'
-
-export interface Product {
-  id: string | number
-  name: string
-  price: number
-  stock_quantity: number
-  image_url?: string | null
-  weight?: string
-  category?: string
-}
+import type { Product } from '../../types/db'
 
 interface ProductCardProps {
   product: Product
@@ -26,17 +18,23 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
         {!outOfStock && product.stock_quantity <= 8 && (
           <span className="product-status low-stock">Low stock</span>
         )}
-        <img
-          src={product.image_url || 'https://via.placeholder.com/400x300?text=MiniMart'}
-          alt={product.name}
-          className="product-card-image"
-        />
+        <Link to={`/products/${product.id}`} className="product-card-media-link">
+          <img
+            src={product.image_url || 'https://via.placeholder.com/400x300?text=MiniMart'}
+            alt={product.name}
+            className="product-card-image"
+          />
+        </Link>
       </div>
 
       <div className="product-card-content">
-        <p className="product-card-kicker">{product.category || 'MiniMart pick'}</p>
-        <h3 title={product.name}>{product.name}</h3>
-        <p className="product-card-meta">{product.weight || `${product.stock_quantity} in stock`}</p>
+        <Link to={`/products/${product.id}`} className="product-card-info-link">
+          <p className="product-card-kicker">{product.category?.name || 'MiniMart pick'}</p>
+          <h3 title={product.name}>{product.name}</h3>
+          <p className="product-card-meta">
+            {product.stock_quantity > 0 ? `${product.stock_quantity} in stock` : 'Out of stock'}
+          </p>
+        </Link>
 
         <div className="product-card-footer">
           <div className="product-card-price">${formattedPrice}</div>

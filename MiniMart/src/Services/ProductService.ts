@@ -1,10 +1,10 @@
 import { supabase } from '../lib/supabase'
-import type { Product, ProductFormData } from '../types/db'
+import type { Product, ProductFormData, ProductReview } from '../types/db'
 
 export async function getProducts(): Promise<Product[]> {
   const { data, error } = await supabase
     .from('products')
-    .select('*')
+    .select('*, category:categories(id, name, slug)')
     .order('created_at', { ascending: false })
 
   if (error) throw error
@@ -27,6 +27,50 @@ export async function uploadProductImage(file: File): Promise<string> {
   return data.publicUrl
 }
 
+export async function getProductById(productId: string): Promise<Product> {
+  const { data, error } = await supabase
+    .from('products')
+    .select('*, category:categories(id, name, slug)')
+    .eq('id', productId)
+    .single()
+
+  if (error) throw error
+  return data
+}
+
+export async function getProductReviews(productId: string): Promise<ProductReview[]> {
+  const { data, error } = await supabase
+    .from('product_reviews')
+    .select('*')
+    .eq('product_id', productId)
+    .order('created_at', { ascending: false })
+
+  if (error) throw error
+  return data || []
+}
+
+export async function createProductReview(
+  productId: string,
+  review: { rating: number; comment: string },
+  userId: string | null,
+  userEmail?: string | null
+): Promise<ProductReview> {
+  const { data, error } = await supabase
+    .from('product_reviews')
+    .insert({
+      product_id: productId,
+      user_id: userId,
+      user_email: userEmail ?? null,
+      rating: review.rating,
+      comment: review.comment
+    })
+    .select()
+    .single()
+
+  if (error) throw error
+  return data
+}
+
 export async function createProduct(
   newProduct: ProductFormData,
   file?: File
@@ -44,9 +88,10 @@ export async function createProduct(
       description: newProduct.description,
       price: newProduct.price,
       stock_quantity: newProduct.stock_quantity,
-      image_url: imageUrl
+      image_url: imageUrl,
+      category_id: newProduct.category_id ?? null
     })
-    .select()
+    .select('*, category:categories(id, name, slug)')
     .single()
 
   if (error) throw error
@@ -71,10 +116,11 @@ export async function updateProduct(
       description: updatedProduct.description,
       price: updatedProduct.price,
       stock_quantity: updatedProduct.stock_quantity,
-      image_url: imageUrl
+      image_url: imageUrl,
+      category_id: updatedProduct.category_id ?? null
     })
     .eq('id', productId)
-    .select()
+    .select('*, category:categories(id, name, slug)')
     .single()
 
   if (error) throw error

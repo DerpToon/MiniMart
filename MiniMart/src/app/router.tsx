@@ -5,6 +5,7 @@ import HomePage from '../pages/HomePage'
 import LoginPage from '../pages/LoginPage'
 import RegisterPage from '../pages/RegisterPage'
 import CatalogPage from '../pages/CatalogPage'
+import ProductDetailsPage from '../pages/ProductDetailsPage.tsx'
 import OrdersPage from '../pages/OrdersPage'
 import CartPage from '../pages/CartPage'
 import ProfilePage from '../pages/ProfilePage'
@@ -12,6 +13,7 @@ import NotFoundPage from '../pages/NotFoundPage'
 
 import AdminProductsPage from '../pages/AdminProductsPage'
 import AdminOrdersPage from '../pages/AdminOrdersPage'
+import AdminUsersPage from '../pages/AdminUsersPage'
 
 import ProtectedRoute from '../components/ProtectedRoute'
 import AdminRoute from '../components/AdminRoute'
@@ -42,6 +44,7 @@ export const router = createBrowserRouter([
       },
 
       { path: 'catalog', element: <CatalogPage /> },
+      { path: 'products/:productId', element: <ProductDetailsPage /> },
 
       {
         path: 'profile',
@@ -81,6 +84,14 @@ export const router = createBrowserRouter([
         element: (
           <AdminRoute>
             <AdminOrdersPage />
+          </AdminRoute>
+        )
+      },
+      {
+        path: 'admin/users',
+        element: (
+          <AdminRoute>
+            <AdminUsersPage />
           </AdminRoute>
         )
       },

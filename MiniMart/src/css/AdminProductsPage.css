@@ -392,6 +392,59 @@
   background: #fee2e2;
 }
 
+.admin-user-card-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  color: var(--text-soft);
+  font-size: 0.95rem;
+}
+
+.admin-user-empty {
+  padding: 2rem;
+  color: var(--text-soft);
+  text-align: center;
+}
+
+.admin-user-reviews-panel {
+  padding: 1.5rem;
+  background: #f8faf7;
+  border-top: 1px solid #dde5e0;
+}
+
+.review-card {
+  padding: 1rem;
+  border: 1px solid #dde5e0;
+  border-radius: 18px;
+  margin-top: 1rem;
+  background: white;
+}
+
+.review-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.8rem;
+}
+
+.review-stars {
+  color: #059669;
+  font-weight: 800;
+}
+
+.review-comment {
+  margin: 0 0 0.5rem 0;
+  color: #354235;
+}
+
+.review-date {
+  margin: 0;
+  color: #8b9d94;
+  font-size: 0.9rem;
+}
+
 @media (max-width: 1200px) {
   .admin-grid-layout {
     grid-template-columns: 1fr;

@@ -132,9 +132,38 @@
 
 .catalog-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 1.2rem;
   margin-top: 1.6rem;
+}
+
+.catalog-category-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.catalog-category-chip {
+  border: 1px solid var(--border);
+  background: white;
+  color: var(--text);
+  border-radius: 999px;
+  padding: 0.8rem 1.15rem;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+}
+
+.catalog-category-chip:hover {
+  background: #f4fbf6;
+  transform: translateY(-1px);
+}
+
+.catalog-category-chip.active {
+  background: linear-gradient(135deg, var(--primary-soft), #d9f2df);
+  border-color: #8ecfab;
+  color: var(--primary-dark);
 }
 
 .catalog-state {

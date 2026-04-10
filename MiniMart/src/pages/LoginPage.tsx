@@ -4,10 +4,11 @@ import { useAuth } from '../hooks/useAuth'
 import '../css/LoginPage.css'
 
 export default function LoginPage() {
-  const { signIn, error, successMessage } = useAuth()
+  const { signIn, resendVerificationEmail, error, successMessage } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  const [resendLoading, setResendLoading] = useState(false)
   const navigate = useNavigate()
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -21,6 +22,13 @@ export default function LoginPage() {
     if (success) {
       navigate('/')
     }
+  }
+
+  async function handleResendVerification() {
+    if (!email) return
+    setResendLoading(true)
+    await resendVerificationEmail(email)
+    setResendLoading(false)
   }
 
   return (
@@ -72,6 +80,16 @@ export default function LoginPage() {
           </form>
 
           {error && <div className="auth-message error">{error}</div>}
+          {error && email && /verify|verification|confirm/i.test(error) && (
+            <button
+              type="button"
+              className="auth-resend-button"
+              onClick={handleResendVerification}
+              disabled={resendLoading}
+            >
+              {resendLoading ? 'Resending...' : 'Resend verification email'}
+            </button>
+          )}
           {successMessage && <div className="auth-message success">{successMessage}</div>}
 
           <p className="auth-footer-text">

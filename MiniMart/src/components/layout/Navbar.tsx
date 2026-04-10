@@ -139,6 +139,10 @@ export default function Navbar() {
                       <Link to="/admin/orders" onClick={() => setIsDropdownOpen(false)}>
                         Manage Orders
                       </Link>
+
+                      <Link to="/admin/users" onClick={() => setIsDropdownOpen(false)}>
+                        Manage Users
+                      </Link>
                     </>
                   )}
 

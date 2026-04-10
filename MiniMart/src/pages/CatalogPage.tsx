@@ -1,5 +1,7 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { useCart } from '../hooks/useCart'
+import { useCategories } from '../hooks/useCategories'
 import { useProducts } from '../hooks/useProducts'
 import ProductCard from '../components/product/ProductCard'
 import heroBackground from '../assets/catalogpage.jpg'
@@ -7,10 +9,13 @@ import '../css/CatalogPage.css'
 
 export default function CatalogPage() {
   const { products, loading, error } = useProducts()
+  const { categories } = useCategories()
   const { addToCart } = useCart()
+  const location = useLocation()
 
   const [sortBy, setSortBy] = useState<'featured' | 'low' | 'high' | 'name'>('featured')
   const [searchTerm, setSearchTerm] = useState('')
+  const [categoryFilter, setCategoryFilter] = useState('All')
 
   function handleAddToCart(product: {
     id: string | number
@@ -30,6 +35,18 @@ export default function CatalogPage() {
     })
   }
 
+  useEffect(() => {
+    const categoryQuery = new URLSearchParams(location.search).get('category')
+    if (categoryQuery) {
+      setCategoryFilter(categoryQuery)
+    }
+  }, [location.search])
+
+  const categoryOptions = useMemo(() => {
+    const options = categories.map((category) => category.name)
+    return ['All', ...Array.from(new Set(options))]
+  }, [categories])
+
   const filteredAndSortedProducts = useMemo(() => {
     const query = searchTerm.trim().toLowerCase()
 
@@ -43,12 +60,16 @@ export default function CatalogPage() {
       })
     }
 
+    if (categoryFilter !== 'All') {
+      items = items.filter((product) => product.category?.name === categoryFilter)
+    }
+
     if (sortBy === 'low') return items.sort((a, b) => a.price - b.price)
     if (sortBy === 'high') return items.sort((a, b) => b.price - a.price)
     if (sortBy === 'name') return items.sort((a, b) => a.name.localeCompare(b.name))
 
     return items
-  }, [products, searchTerm, sortBy])
+  }, [products, searchTerm, sortBy, categoryFilter])
 
   if (loading) {
     return (
@@ -121,7 +142,38 @@ export default function CatalogPage() {
             </select>
           </div>
 
+          <div className="catalog-sort-wrapper">
+            <label htmlFor="catalog-category" className="catalog-filter-label">
+              Category
+            </label>
+            <select
+              id="catalog-category"
+              value={categoryFilter}
+              className="catalog-sort-select"
+              onChange={(e) => setCategoryFilter(e.target.value)}
+            >
+              {categoryOptions.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div className="catalog-summary-chip">{filteredAndSortedProducts.length} items found</div>
+        </section>
+
+        <section className="catalog-category-chips">
+          {categoryOptions.map((category) => (
+            <button
+              key={category}
+              type="button"
+              className={`catalog-category-chip ${categoryFilter === category ? 'active' : ''}`}
+              onClick={() => setCategoryFilter(category)}
+            >
+              {category}
+            </button>
+          ))}
         </section>
 
         {filteredAndSortedProducts.length === 0 ? (

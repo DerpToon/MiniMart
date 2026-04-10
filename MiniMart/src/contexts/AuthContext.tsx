@@ -6,6 +6,7 @@ import type { AppUser } from "../types/auth"
 import {
   getCurrentUser,
   signInWithEmail,
+  resendVerificationEmail as sendVerificationEmail,
   signOutUser,
   signUpWithEmail,
   subscribeToAuthChanges
@@ -18,6 +19,7 @@ type AuthContextType = {
   successMessage: string
   signUp: (email: string, password: string) => Promise<boolean>
   signIn: (email: string, password: string) => Promise<boolean>
+  resendVerificationEmail: (email: string) => Promise<boolean>
   signOut: () => Promise<boolean>
 }
 
@@ -66,7 +68,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSuccessMessage("")
 
       await signUpWithEmail(email, password)
-      setSuccessMessage("Account created successfully!")
+      setSuccessMessage(
+        "Account created! Check your email and verify your address before logging in."
+      )
 
       return true
     } catch (err: any) {
@@ -85,7 +89,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       return true
     } catch (err: any) {
-      setError(err.message)
+      const message = String(err.message || err.description || err.error || '')
+      const lower = message.toLowerCase()
+      if (lower.includes('confirm') || lower.includes('verified') || lower.includes('verification')) {
+        setError('Please verify your email before logging in. Check your inbox for the confirmation link.')
+      } else {
+        setError(message)
+      }
+      return false
+    }
+  }
+
+  async function resendVerificationEmail(email: string) {
+    try {
+      setError("")
+      setSuccessMessage("")
+
+      await sendVerificationEmail(email)
+      setSuccessMessage('Verification link sent. Please check your email.')
+      return true
+    } catch (err: any) {
+      setError(err.message || 'Unable to resend verification email.')
       return false
     }
   }
@@ -114,6 +138,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         successMessage,
         signUp,
         signIn,
+        resendVerificationEmail,
         signOut
       }}
     >

@@ -16,6 +16,37 @@ export async function getProfile(): Promise<Profile | null> {
   if (error) throw error
   return data
 }
+
+export async function getAllProfiles(): Promise<Profile[]> {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('id, full_name, role, created_at')
+    .order('created_at', { ascending: false })
+
+  if (error) throw error
+  return data || []
+}
+
+export async function updateUserRole(userId: string, role: 'customer' | 'admin'): Promise<void> {
+  const { error } = await supabase
+    .from('profiles')
+    .update({ role })
+    .eq('id', userId)
+
+  if (error) throw error
+}
+
+export async function getReviewsByUserId(userId: string) {
+  const { data, error } = await supabase
+    .from('product_reviews')
+    .select('id, rating, comment, created_at, product_id, user_email')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+
+  if (error) throw error
+  return data || []
+}
+
 export async function getMyProfileView(): Promise<ProfileView> {
   const {
     data: { user },

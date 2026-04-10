@@ -20,6 +20,13 @@ export type ProfileView = {
   created_at: string
 }
 
+export type Category = {
+  id: string
+  name: string
+  slug: string
+  created_at: string
+}
+
 export type Product = {
   id: string
   name: string
@@ -27,6 +34,8 @@ export type Product = {
   price: number
   stock_quantity: number
   image_url: string | null
+  category_id: string | null
+  category: Category | null
   created_at: string
 }
 
@@ -36,6 +45,17 @@ export type ProductFormData = {
   price: number
   stock_quantity: number
   image_url?: string | null
+  category_id?: string | null
+}
+
+export type ProductReview = {
+  id: string
+  product_id: string
+  user_id: string | null
+  user_email: string | null
+  rating: number
+  comment: string
+  created_at: string
 }
 
 export type Order = {

@@ -1,20 +1,45 @@
 import { Link } from 'react-router-dom'
 import { useCart } from '../hooks/useCart'
 import { useProducts } from '../hooks/useProducts'
+import { useCategories } from '../hooks/useCategories'
 import ProductCard from '../components/product/ProductCard'
 import heroBackground from '../assets/grocery-hero.jpg'
 import '../css/HomePage.css'
 
-const categories = [
+const defaultCategories = [
   { title: 'Vegetables', text: 'Fresh greens and everyday essentials', icon: '🥬' },
   { title: 'Fruits', text: 'Sweet, healthy and ready to deliver', icon: '🍎' },
   { title: 'Dairy', text: 'Milk, cheese and chilled basics', icon: '🥛' },
-  { title: 'Bakery', text: 'Breads and snacks for quick orders', icon: '🥐' }
+  { title: 'Bakery', text: 'Breads and snacks for quick orders', icon: '🥐' },
+  { title: 'Meat', text: 'Fresh cuts ready for the grill or oven', icon: '🥩' },
+  { title: 'Beverages', text: 'Cold drinks and pantry refreshments', icon: '🥤' }
 ]
+
+const categoryIcons: Record<string, string> = {
+  Vegetables: '🥬',
+  Fruits: '🍎',
+  Dairy: '🥛',
+  Bakery: '🥐',
+  Pantry: '🛒',
+  Snacks: '🍪',
+  Meat: '🥩',
+  Beverages: '🥤',
+  Drinks: '🥤'
+}
 
 export default function HomePage() {
   const { products, loading, error } = useProducts()
+  const { categories: dbCategories } = useCategories()
   const { addToCart } = useCart()
+
+  const categories =
+    dbCategories.length > 0
+      ? dbCategories.map((category) => ({
+          title: category.name,
+          text: `Shop ${category.name.toLowerCase()}`,
+          icon: categoryIcons[category.name] ?? '🛒'
+        }))
+      : defaultCategories
 
   function handleAddToCart(product: {
     id: string | number
@@ -76,11 +101,15 @@ export default function HomePage() {
 
           <div className="category-grid">
             {categories.map((category) => (
-              <article className="category-tile" key={category.title}>
+              <Link
+                to={`/catalog?category=${encodeURIComponent(category.title)}`}
+                className="category-tile"
+                key={category.title}
+              >
                 <span className="category-icon">{category.icon}</span>
                 <h3>{category.title}</h3>
                 <p>{category.text}</p>
-              </article>
+              </Link>
             ))}
           </div>
         </section>

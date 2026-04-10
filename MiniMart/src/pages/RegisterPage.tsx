@@ -4,10 +4,11 @@ import { useAuth } from '../hooks/useAuth'
 import '../css/RegisterPage.css'
 
 export default function RegisterPage() {
-  const { signUp, error, successMessage } = useAuth()
+  const { signUp, resendVerificationEmail, error, successMessage } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  const [resendLoading, setResendLoading] = useState(false)
   const navigate = useNavigate()
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -21,6 +22,13 @@ export default function RegisterPage() {
     if (success) {
       navigate('/login')
     }
+  }
+
+  async function handleResendVerification() {
+    if (!email) return
+    setResendLoading(true)
+    await resendVerificationEmail(email)
+    setResendLoading(false)
   }
 
   return (
@@ -73,6 +81,16 @@ export default function RegisterPage() {
 
           {error && <div className="auth-message error">{error}</div>}
           {successMessage && <div className="auth-message success">{successMessage}</div>}
+          {successMessage && email && (
+            <button
+              type="button"
+              className="auth-resend-button"
+              onClick={handleResendVerification}
+              disabled={resendLoading}
+            >
+              {resendLoading ? 'Resending...' : 'Resend verification email'}
+            </button>
+          )}
 
           <p className="auth-footer-text">
             Already have an account? <Link to="/login">Login</Link>
