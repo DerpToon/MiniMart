@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useCart } from '../hooks/useCart'
 import { useCategories } from '../hooks/useCategories'
@@ -15,7 +15,9 @@ export default function CatalogPage() {
 
   const [sortBy, setSortBy] = useState<'featured' | 'low' | 'high' | 'name'>('featured')
   const [searchTerm, setSearchTerm] = useState('')
-  const [categoryFilter, setCategoryFilter] = useState('All')
+  const [categoryFilter, setCategoryFilter] = useState(
+    () => new URLSearchParams(location.search).get('category') || 'All'
+  )
 
   function handleAddToCart(product: {
     id: string | number
@@ -34,13 +36,6 @@ export default function CatalogPage() {
       image_url: product.image_url || null
     })
   }
-
-  useEffect(() => {
-    const categoryQuery = new URLSearchParams(location.search).get('category')
-    if (categoryQuery) {
-      setCategoryFilter(categoryQuery)
-    }
-  }, [location.search])
 
   const categoryOptions = useMemo(() => {
     const options = categories.map((category) => category.name)

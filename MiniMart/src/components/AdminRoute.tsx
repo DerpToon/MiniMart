@@ -2,6 +2,7 @@ import { Navigate } from 'react-router-dom'
 import type { ReactNode } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import { useProfile } from '../hooks/useProfile'
+import RouteLoadingScreen from './RouteLoadingScreen'
 
 type AdminRouteProps = {
   children: ReactNode
@@ -12,7 +13,7 @@ export default function AdminRoute({ children }: AdminRouteProps) {
   const { profile, loading: profileLoading } = useProfile()
 
   if (authLoading || profileLoading) {
-    return <p>Loading...</p>
+    return <RouteLoadingScreen message="Checking admin access..." />
   }
 
   if (!user) {

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { getCategories } from '../Services/CategoryService'
+import { getErrorMessage } from '../lib/error'
 import type { Category } from '../types/db'
 
 export function useCategories() {
@@ -15,8 +16,8 @@ export function useCategories() {
       try {
         const data = await getCategories()
         setCategories(data)
-      } catch (err: any) {
-        setError(err.message)
+      } catch (error: unknown) {
+        setError(getErrorMessage(error, 'Failed to load categories.'))
       } finally {
         setLoading(false)
       }

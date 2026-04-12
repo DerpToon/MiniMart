@@ -1,5 +1,4 @@
 import {
-  createContext,
   useCallback,
   useEffect,
   useMemo,
@@ -7,37 +6,23 @@ import {
   type ReactNode
 } from 'react'
 import type { CartItem } from '../types/cart'
-
-type CartContextType = {
-  cart: CartItem[]
-  addToCart: (item: CartItem) => void
-  decreaseQuantity: (productId: string) => void
-  removeFromCart: (productId: string) => void
-  clearCart: () => void
-  getTotal: () => number
-  getItemsCount: () => number
-}
-
-export const CartContext = createContext<CartContextType | undefined>(undefined)
+import { CartContext } from './cartContext'
 
 const STORAGE_KEY = 'minimart_cart'
 
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [cart, setCart] = useState<CartItem[]>([])
-
-  useEffect(() => {
+  const [cart, setCart] = useState<CartItem[]>(() => {
     const savedCart = localStorage.getItem(STORAGE_KEY)
 
-    if (!savedCart) return
+    if (!savedCart) return []
 
     try {
-      const parsedCart = JSON.parse(savedCart) as CartItem[]
-      setCart(parsedCart)
+      return JSON.parse(savedCart) as CartItem[]
     } catch (error) {
       console.error('Failed to parse saved cart:', error)
-      setCart([])
+      return []
     }
-  }, [])
+  })
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(cart))

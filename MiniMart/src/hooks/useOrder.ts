@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { CartItem } from '../types/cart'
+import { getErrorMessage } from '../lib/error'
 import { placeOrder } from '../Services/OrderService'
 
 export function useOrder() {
@@ -14,9 +15,9 @@ export function useOrder() {
       // FIX: Passing both cart and total to the service
       const orderId = await placeOrder(cart, total)
       return orderId
-    } catch (err: any) {
-      setError(err.message)
-      throw err
+    } catch (error: unknown) {
+      setError(getErrorMessage(error, 'Failed to place order.'))
+      throw error
     } finally {
       setLoading(false)
     }

@@ -1,11 +1,31 @@
 import { useMemo, useRef, useState } from 'react'
 import { useCategories } from '../hooks/useCategories'
 import { useProducts } from '../hooks/useProducts'
+import { getErrorMessage } from '../lib/error'
 import { createProduct, deleteProduct, updateProduct } from '../Services/ProductService'
-import type { Category, Product, ProductFormData } from '../types/db'
+import type { Product, ProductFormData } from '../types/db'
 import '../css/AdminProductsPage.css'
 
 const fallbackCategoryOptions = ['Vegetables', 'Fruits', 'Dairy', 'Bakery', 'Pantry', 'Snacks']
+const productImagePlaceholder = 'https://via.placeholder.com/80x80?text=MiniMart'
+
+function getProductImageUrl(imageUrl: string | null | undefined): string {
+  const trimmed = imageUrl?.trim() ?? ''
+
+  if (!trimmed) return productImagePlaceholder
+
+  if (
+    trimmed.startsWith('http://') ||
+    trimmed.startsWith('https://') ||
+    trimmed.startsWith('/') ||
+    trimmed.startsWith('data:image/') ||
+    trimmed.startsWith('blob:')
+  ) {
+    return trimmed
+  }
+
+  return productImagePlaceholder
+}
 
 const initialForm: ProductFormData = {
   name: '',
@@ -18,7 +38,7 @@ const initialForm: ProductFormData = {
 
 export default function AdminProductsPage() {
   const { products, loading, error } = useProducts()
-  const { categories, loading: categoriesLoading } = useCategories()
+  const { categories } = useCategories()
   const [form, setForm] = useState<ProductFormData>(initialForm)
   const [selectedFile, setSelectedFile] = useState<File | undefined>(undefined)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
@@ -27,6 +47,7 @@ export default function AdminProductsPage() {
   const [minPrice, setMinPrice] = useState(0)
   const [maxPrice, setMaxPrice] = useState(500)
   const [selectedCategory, setSelectedCategory] = useState('All')
+  const [brokenImageIds, setBrokenImageIds] = useState<Record<string, true>>({})
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const availableCategories = useMemo(() => {
@@ -108,8 +129,8 @@ export default function AdminProductsPage() {
       }
       resetForm()
       window.location.reload()
-    } catch (err: any) {
-      alert(err.message)
+    } catch (error: unknown) {
+      alert(getErrorMessage(error, 'Failed to save product.'))
     } finally {
       setSubmitting(false)
     }
@@ -134,6 +155,13 @@ export default function AdminProductsPage() {
     setSelectedFile(undefined)
   }
 
+  function markImageAsBroken(productId: string) {
+    setBrokenImageIds((prev) => {
+      if (prev[productId]) return prev
+      return { ...prev, [productId]: true }
+    })
+  }
+
   async function handleDelete(product: Product) {
     if (!window.confirm(`Are you sure you want to delete "${product.name}"?`)) {
       return
@@ -143,8 +171,8 @@ export default function AdminProductsPage() {
       setSubmitting(true)
       await deleteProduct(product.id)
       window.location.reload()
-    } catch (err: any) {
-      alert(`Delete failed: ${err.message}`)
+    } catch (error: unknown) {
+      alert(`Delete failed: ${getErrorMessage(error, 'Unable to delete product.')}`)
     } finally {
       setSubmitting(false)
     }
@@ -321,8 +349,10 @@ export default function AdminProductsPage() {
                       <td>
                         <div className="admin-product-cell">
                           <img
-                            src={product.image_url || 'https://via.placeholder.com/80x80?text=MiniMart'}
+                            src={brokenImageIds[product.id] ? productImagePlaceholder : getProductImageUrl(product.image_url)}
                             alt={product.name}
+                            loading="lazy"
+                            onError={() => markImageAsBroken(product.id)}
                           />
                           <div>
                             <strong>{product.name}</strong>

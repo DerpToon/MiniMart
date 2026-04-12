@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from 'react'
+import { Fragment, useEffect, useMemo, useState } from 'react'
 import { getAllOrders, updateOrderStatus, deleteOrder } from '../Services/OrderService'
 import { useOrderItems } from '../hooks/useOrderItems'
+import { getErrorMessage } from '../lib/error'
 import type { Order } from '../types/db'
 import {
   ResponsiveContainer,
@@ -86,10 +87,21 @@ export default function AdminOrdersPage() {
 
     try {
       await deleteOrder(orderId)
-      setOrders(orders.filter(o => o.id !== orderId))
+      setOrders((previousOrders) => previousOrders.filter((order) => order.id !== orderId))
       alert('Order deleted successfully')
-    } catch (err: any) {
-      alert(`Failed to delete order: ${err.message}`)
+    } catch (error: unknown) {
+      alert(`Failed to delete order: ${getErrorMessage(error, 'Unable to delete order.')}`)
+    }
+  }
+
+  async function handleStatusChange(orderId: string, status: Order['status']) {
+    try {
+      const updatedOrder = await updateOrderStatus(orderId, status)
+      setOrders((previousOrders) =>
+        previousOrders.map((order) => (order.id === orderId ? updatedOrder : order))
+      )
+    } catch (error: unknown) {
+      alert(`Failed to update order status: ${getErrorMessage(error, 'Unable to update status.')}`)
     }
   }
 
@@ -177,27 +189,23 @@ export default function AdminOrdersPage() {
             <table className="admin-orders-table">
               <thead>
                 <tr>
-                  <th></th>
+                  <th className="expand-column"></th>
                   <th>Order</th>
                   <th>Date</th>
                   <th>Total</th>
-                  <th>Status</th>
-                  <th></th>
+                  <th className="status-column">
+                    <span className="status-heading">Status</span>
+                  </th>
+                  <th className="action-column"></th>
                 </tr>
               </thead>
               <tbody>
                 {orders.map((order) => (
-                  <>
-                    <tr key={order.id}>
-                      <td style={{ width: '40px', textAlign: 'center' }}>
+                  <Fragment key={order.id}>
+                    <tr>
+                      <td className="expand-cell">
                         <button
-                          style={{
-                            background: 'none',
-                            border: 'none',
-                            cursor: 'pointer',
-                            fontSize: '18px',
-                            padding: '4px 8px'
-                          }}
+                          className="expand-button"
                           onClick={() => setExpandedOrder(expandedOrder === order.id ? null : order.id)}
                         >
                           {expandedOrder === order.id ? '▼' : '▶'}
@@ -211,34 +219,23 @@ export default function AdminOrdersPage() {
                       </td>
                       <td>{new Date(order.created_at).toLocaleDateString()}</td>
                       <td className="amount-cell">${(Number(order.total) || 0).toFixed(2)}</td>
-                      <td>
-                        <select
-                          className={`order-status-select ${order.status}`}
-                          value={order.status}
-                          onChange={(e) =>
-                            updateOrderStatus(order.id, e.target.value as Order['status']).then(() =>
-                              window.location.reload()
-                            )
-                          }
-                        >
-                          <option value="pending">Pending</option>
-                          <option value="confirmed">Confirmed</option>
-                          <option value="fulfilled">Fulfilled</option>
-                        </select>
+                      <td className="status-cell">
+                        <div className="status-select-wrap">
+                          <select
+                            className={`order-status-select ${order.status}`}
+                            value={order.status}
+                            onChange={(e) => handleStatusChange(order.id, e.target.value as Order['status'])}
+                          >
+                            <option value="pending">Pending</option>
+                            <option value="confirmed">Confirmed</option>
+                            <option value="fulfilled">Fulfilled</option>
+                          </select>
+                        </div>
                       </td>
-                      <td>
+                      <td className="action-cell">
                         {order.status === 'fulfilled' && (
                           <button
-                            style={{
-                              padding: '6px 12px',
-                              backgroundColor: '#dc3545',
-                              color: 'white',
-                              border: 'none',
-                              borderRadius: '4px',
-                              cursor: 'pointer',
-                              fontSize: '0.9em',
-                              fontWeight: '500'
-                            }}
+                            className="order-delete-button"
                             onClick={() => handleDeleteOrder(order.id)}
                           >
                             Delete
@@ -247,7 +244,7 @@ export default function AdminOrdersPage() {
                       </td>
                     </tr>
                     {expandedOrder === order.id && <OrderItemsRow orderId={order.id} />}
-                  </>
+                  </Fragment>
                 ))}
               </tbody>
             </table>

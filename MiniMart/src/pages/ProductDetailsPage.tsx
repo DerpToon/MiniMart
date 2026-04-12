@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { useCart } from '../hooks/useCart'
+import { getErrorMessage } from '../lib/error'
 import { getProductById, getProductReviews, createProductReview } from '../Services/ProductService'
 import type { Product, ProductReview } from '../types/db'
 import '../css/ProductDetailsPage.css'
@@ -35,8 +36,8 @@ export default function ProductDetailsPage() {
 
         setProduct(productData)
         setReviews(reviewData)
-      } catch (err: any) {
-        setError(err.message || 'Unable to load product details.')
+      } catch (error: unknown) {
+        setError(getErrorMessage(error, 'Unable to load product details.'))
       } finally {
         setLoading(false)
       }
@@ -85,8 +86,8 @@ export default function ProductDetailsPage() {
       setComment('')
       setRating(5)
       setSuccess('Your review was submitted successfully.')
-    } catch (err: any) {
-      setError(err.message || 'Unable to submit review.')
+    } catch (error: unknown) {
+      setError(getErrorMessage(error, 'Unable to submit review.'))
     } finally {
       setSubmitLoading(false)
     }

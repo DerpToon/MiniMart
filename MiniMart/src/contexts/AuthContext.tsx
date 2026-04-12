@@ -3,6 +3,7 @@
 import { createContext, useEffect, useState } from "react"
 import type { ReactNode } from "react"
 import type { AppUser } from "../types/auth"
+import { getErrorMessage } from '../lib/error'
 import {
   getCurrentUser,
   signInWithEmail,
@@ -33,6 +34,10 @@ function mapUser(user: { id: string; email?: string | null } | null): AppUser | 
   }
 }
 
+function isSameUser(a: AppUser | null, b: AppUser | null) {
+  return a?.id === b?.id && a?.email === b?.email
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AppUser | null>(null)
   const [loading, setLoading] = useState(true)
@@ -42,10 +47,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     async function init() {
       try {
-        const user = await getCurrentUser()
-        setUser(mapUser(user))
-      } catch (err: any) {
-        setError(err.message)
+        const nextUser = mapUser(await getCurrentUser())
+        setUser((previousUser) => (isSameUser(previousUser, nextUser) ? previousUser : nextUser))
+      } catch (error: unknown) {
+        setError(getErrorMessage(error, 'Failed to initialize session.'))
       } finally {
         setLoading(false)
       }
@@ -54,7 +59,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     init()
 
     const subscription = subscribeToAuthChanges((_event, session) => {
-      setUser(mapUser(session?.user ?? null))
+      const nextUser = mapUser(session?.user ?? null)
+      setUser((previousUser) => (isSameUser(previousUser, nextUser) ? previousUser : nextUser))
     })
 
     return () => {
@@ -73,8 +79,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       )
 
       return true
-    } catch (err: any) {
-      setError(err.message)
+    } catch (error: unknown) {
+      setError(getErrorMessage(error, 'Failed to create account.'))
       return false
     }
   }
@@ -88,8 +94,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSuccessMessage("Signed in successfully!")
 
       return true
-    } catch (err: any) {
-      const message = String(err.message || err.description || err.error || '')
+    } catch (error: unknown) {
+      const message = getErrorMessage(error, 'Unable to sign in.')
       const lower = message.toLowerCase()
       if (lower.includes('confirm') || lower.includes('verified') || lower.includes('verification')) {
         setError('Please verify your email before logging in. Check your inbox for the confirmation link.')
@@ -108,8 +114,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await sendVerificationEmail(email)
       setSuccessMessage('Verification link sent. Please check your email.')
       return true
-    } catch (err: any) {
-      setError(err.message || 'Unable to resend verification email.')
+    } catch (error: unknown) {
+      setError(getErrorMessage(error, 'Unable to resend verification email.'))
       return false
     }
   }
@@ -123,8 +129,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSuccessMessage("Signed out successfully!")
 
       return true
-    } catch (err: any) {
-      setError(err.message)
+    } catch (error: unknown) {
+      setError(getErrorMessage(error, 'Failed to sign out.'))
       return false
     }
   }

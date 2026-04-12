@@ -1,5 +1,5 @@
 import { Link, NavLink } from 'react-router-dom'
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { useAuth } from '../../hooks/useAuth'
 import { useProfile } from '../../hooks/useProfile'
 import { useCart } from '../../hooks/useCart'
@@ -13,19 +13,15 @@ export default function Navbar() {
 
   const totalCartItems = cart.reduce((sum, item) => sum + item.quantity, 0)
 
-  const avatarText = useMemo(() => {
-    if (profile?.full_name?.trim()) {
-      return profile.full_name
+  const avatarText = profile?.full_name?.trim()
+    ? profile.full_name
         .trim()
         .split(' ')
         .filter(Boolean)
         .slice(0, 2)
         .map((part) => part[0]?.toUpperCase())
         .join('')
-    }
-
-    return user?.email?.charAt(0).toUpperCase() || 'U'
-  }, [profile?.full_name, user?.email])
+    : user?.email?.charAt(0).toUpperCase() || 'U'
 
   async function handleSignOut() {
     try {

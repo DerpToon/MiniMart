@@ -1,6 +1,7 @@
 import { Navigate } from 'react-router-dom'
 import type { ReactNode } from 'react'
 import { useAuth } from '../hooks/useAuth'
+import RouteLoadingScreen from './RouteLoadingScreen'
 
 type GuestOnlyRouteProps = {
   children: ReactNode
@@ -10,7 +11,7 @@ export default function GuestOnlyRoute({ children }: GuestOnlyRouteProps) {
   const { user, loading } = useAuth()
 
   if (loading) {
-    return <p>Loading auth...</p>
+    return <RouteLoadingScreen message="Preparing sign-in..." />
   }
 
   if (user) {

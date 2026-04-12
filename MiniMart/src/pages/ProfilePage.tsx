@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
-import type { ProfileFormData, ProfileView } from '../types'
-import { getMyProfileView, updateMyProfile } from '../services/profileService'
+import type { ProfileFormData, ProfileView } from '../types/db'
+import { getMyProfileView, updateMyProfile } from '../Services/ProfileService'
+import { getErrorMessage } from '../lib/error'
 import '../css/ProfilePage.css'
 
 const initialForm: ProfileFormData = {
@@ -32,8 +33,8 @@ export default function ProfilePage() {
           new_password: '',
           confirm_password: ''
         })
-      } catch (err: any) {
-        setError(err.message || 'Failed to load profile.')
+      } catch (error: unknown) {
+        setError(getErrorMessage(error, 'Failed to load profile.'))
       } finally {
         setLoading(false)
       }
@@ -85,8 +86,8 @@ export default function ProfilePage() {
       setSuccess(
         'Profile updated successfully. If you changed your email, check your inbox for confirmation.'
       )
-    } catch (err: any) {
-      setError(err.message || 'Failed to update profile.')
+    } catch (error: unknown) {
+      setError(getErrorMessage(error, 'Failed to update profile.'))
     } finally {
       setSaving(false)
     }

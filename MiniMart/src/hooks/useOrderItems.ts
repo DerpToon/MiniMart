@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { getErrorMessage } from '../lib/error'
 import type { OrderItem } from '../types/db'
 import { getOrderItems } from '../Services/OrderService'
 
@@ -21,8 +22,8 @@ export function useOrderItems(orderId: string) {
       try {
         const data = await getOrderItems(orderId)
         setItems(data)
-      } catch (err: any) {
-        setError(err.message || 'Failed to load order items.')
+      } catch (error: unknown) {
+        setError(getErrorMessage(error, 'Failed to load order items.'))
       } finally {
         setLoading(false)
       }

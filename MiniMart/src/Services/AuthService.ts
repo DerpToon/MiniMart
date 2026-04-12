@@ -3,15 +3,13 @@ import type { AuthChangeEvent, Session, User } from '@supabase/supabase-js'
 
 export async function signUpWithEmail(email: string, password: string) {
   const redirectTo = `${window.location.origin}/login`
-  const { data, error } = await supabase.auth.signUp(
-    {
-      email,
-      password
-    },
-    {
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
       emailRedirectTo: redirectTo
     }
-  )
+  })
 
   if (error) throw error
   return data

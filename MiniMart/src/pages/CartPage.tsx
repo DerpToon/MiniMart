@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { useCart } from '../hooks/useCart'
 import { useOrder } from '../hooks/useOrder'
+import { getErrorMessage } from '../lib/error'
 import '../css/CartPage.css'
 
 export default function CartPage() {
@@ -20,9 +21,9 @@ export default function CartPage() {
       clearCart()
       alert(`Checkout successful! Order ID: ${orderId}`)
       navigate('/orders')
-    } catch (err: any) {
-      console.error(err)
-      alert(`Checkout failed: ${err.message}`)
+    } catch (error: unknown) {
+      console.error(error)
+      alert(`Checkout failed: ${getErrorMessage(error, 'Unable to place order.')}`)
     }
   }
 

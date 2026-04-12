@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { getErrorMessage } from '../lib/error'
 import { getProducts } from '../Services/ProductService'
 import type { Product } from '../types/db'
 
@@ -15,8 +16,8 @@ export function useProducts() {
       try {
         const data = await getProducts()
         setProducts(data)
-      } catch (err: any) {
-        setError(err.message)
+      } catch (error: unknown) {
+        setError(getErrorMessage(error, 'Failed to load products.'))
       } finally {
         setLoading(false)
       }

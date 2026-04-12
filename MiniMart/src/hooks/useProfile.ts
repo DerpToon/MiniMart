@@ -7,10 +7,11 @@ export function useProfile() {
   const { user } = useAuth()
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
+  const userId = user?.id ?? null
 
   useEffect(() => {
     async function loadProfile() {
-      if (!user) {
+      if (!userId) {
         setProfile(null)
         setLoading(false)
         return
@@ -29,7 +30,7 @@ export function useProfile() {
 
     setLoading(true)
     loadProfile()
-  }, [user])
+  }, [userId])
 
   return { profile, loading }
 }

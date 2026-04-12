@@ -33,7 +33,7 @@
 .admin-orders-total-card {
   padding: 1.3rem 1.5rem;
   min-width: 220px;
-  text-align: right;
+  text-align: center;
 }
 
 .admin-orders-total-card span,
@@ -112,6 +112,7 @@
 .admin-orders-table td {
   padding: 1rem 1.15rem;
   text-align: left;
+  vertical-align: middle;
 }
 
 .admin-orders-table thead th {
@@ -124,6 +125,46 @@
 
 .admin-orders-table tbody tr + tr td {
   border-top: 1px solid #eef4ef;
+}
+
+.expand-column,
+.expand-cell {
+  width: 52px;
+  text-align: center;
+}
+
+.status-column,
+.status-cell,
+.action-column,
+.action-cell {
+  text-align: center;
+}
+
+.status-heading {
+  display: block;
+  width: 144px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.status-column,
+.status-cell {
+  width: 180px;
+}
+
+.action-column,
+.action-cell {
+  width: 120px;
+}
+
+.expand-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  padding: 4px 8px;
+  color: var(--heading);
 }
 
 .order-ref-cell {
@@ -141,12 +182,39 @@
   color: var(--text-soft);
 }
 
+.status-select-wrap {
+  position: relative;
+  width: 144px;
+  margin: 0 auto;
+}
+
+.status-select-wrap::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 18px;
+  width: 7px;
+  height: 7px;
+  border-right: 2px solid #157347;
+  border-bottom: 2px solid #157347;
+  transform: translateY(-65%) rotate(45deg);
+  pointer-events: none;
+}
+
 .order-status-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  display: block;
   border: 0;
   border-radius: 999px;
-  padding: 0.7rem 1rem;
-  font-weight: 800;
+  width: 100%;
+  padding: 0.7rem 2rem;
+  font-weight: 600;
   outline: none;
+  text-align: center;
+  text-align-last: center;
+  cursor: pointer;
 }
 
 .order-status-select.pending {
@@ -162,6 +230,24 @@
 .order-status-select.fulfilled {
   background: #edf8ef;
   color: #157347;
+}
+
+.order-status-select option {
+  background: white;
+  color: var(--heading);
+  font-weight: 500;
+  text-align: left;
+}
+
+.order-delete-button {
+  padding: 0.55rem 0.9rem;
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 700;
 }
 
 .admin-orders-state {

@@ -1,4 +1,11 @@
-export default function CartItem({ item, onRemove }: any) {
+import type { CartItem as CartLineItem } from '../../types/cart'
+
+type CartItemProps = {
+  item: CartLineItem
+  onRemove: () => void
+}
+
+export default function CartItem({ item, onRemove }: CartItemProps) {
   return (
     <div className="flex items-center justify-between bg-white p-4 rounded-xl shadow mb-4">
       <img
@@ -12,5 +19,5 @@ export default function CartItem({ item, onRemove }: any) {
         Remove
       </button>
     </div>
-  );
+  )
 }

@@ -1,6 +1,5 @@
 import { supabase } from '../lib/supabase'
-import type { Profile } from '../types/db'
-import type { ProfileView } from '../types/db'
+import type { ProductReview, Profile, ProfileView } from '../types/db'
 
 type UpdateMyProfileInput = {
   full_name: string
@@ -8,10 +7,19 @@ type UpdateMyProfileInput = {
   new_password?: string
 }
 export async function getProfile(): Promise<Profile | null> {
+  const {
+    data: { user },
+    error: authError
+  } = await supabase.auth.getUser()
+
+  if (authError) throw authError
+  if (!user) return null
+
   const { data, error } = await supabase
     .from('profiles')
     .select('*')
-    .single()
+    .eq('id', user.id)
+    .maybeSingle()
 
   if (error) throw error
   return data
@@ -36,15 +44,24 @@ export async function updateUserRole(userId: string, role: 'customer' | 'admin')
   if (error) throw error
 }
 
-export async function getReviewsByUserId(userId: string) {
+export async function getReviewsByUserId(userId: string): Promise<ProductReview[]> {
   const { data, error } = await supabase
     .from('product_reviews')
-    .select('id, rating, comment, created_at, product_id, user_email')
+    .select('id, rating, comment, created_at, product_id, user_id, user_email')
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
 
   if (error) throw error
-  return data || []
+  return (data || []) as ProductReview[]
+}
+
+export async function deleteReviewById(reviewId: string): Promise<void> {
+  const { error } = await supabase
+    .from('product_reviews')
+    .delete()
+    .eq('id', reviewId)
+
+  if (error) throw error
 }
 
 export async function getMyProfileView(): Promise<ProfileView> {
