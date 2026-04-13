@@ -100,11 +100,55 @@
 }
 
 .admin-orders-table-wrap {
-  overflow: auto;
+  overflow-x: auto;
+  overflow-y: visible;
+  width: 100%;
+}
+
+.admin-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.3rem 1.4rem;
+}
+
+.admin-pagination span {
+  color: var(--text-soft);
+  font-size: 0.95rem;
+}
+
+.pagination-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.pagination-buttons button {
+  border: 1px solid #dde5e0;
+  background: white;
+  color: var(--heading);
+  border-radius: 12px;
+  min-width: 40px;
+  padding: 0.6rem 0.95rem;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.pagination-buttons button.active,
+.pagination-buttons button:hover:not(:disabled) {
+  background: var(--primary-soft);
+  border-color: var(--primary);
+}
+
+.pagination-buttons button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .admin-orders-table {
   width: 100%;
+  min-width: 760px;
   border-collapse: collapse;
 }
 

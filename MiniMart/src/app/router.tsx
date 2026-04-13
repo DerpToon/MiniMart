@@ -14,6 +14,8 @@ import NotFoundPage from '../pages/NotFoundPage'
 import AdminProductsPage from '../pages/AdminProductsPage'
 import AdminOrdersPage from '../pages/AdminOrdersPage'
 import AdminUsersPage from '../pages/AdminUsersPage'
+import ContactPage from '../pages/ContactPage'
+import AboutPage from '../pages/AboutPage'
 
 import ProtectedRoute from '../components/ProtectedRoute'
 import AdminRoute from '../components/AdminRoute'
@@ -45,6 +47,8 @@ export const router = createBrowserRouter([
 
       { path: 'catalog', element: <CatalogPage /> },
       { path: 'products/:productId', element: <ProductDetailsPage /> },
+      { path: 'about', element: <AboutPage /> },
+      { path: 'contact', element: <ContactPage /> },
 
       {
         path: 'profile',

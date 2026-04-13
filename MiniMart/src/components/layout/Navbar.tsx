@@ -56,6 +56,14 @@ export default function Navbar() {
               Catalog
             </NavLink>
 
+            <NavLink to="/about" className={({ isActive }) => `nav-pill ${isActive ? 'active' : ''}`}>
+              About
+            </NavLink>
+
+            <NavLink to="/contact" className={({ isActive }) => `nav-pill ${isActive ? 'active' : ''}`}>
+              Contact
+            </NavLink>
+
             {user && (
               <NavLink to="/orders" className={({ isActive }) => `nav-pill ${isActive ? 'active' : ''}`}>
                 My Orders

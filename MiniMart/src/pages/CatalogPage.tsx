@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useCart } from '../hooks/useCart'
 import { useCategories } from '../hooks/useCategories'
@@ -18,6 +18,8 @@ export default function CatalogPage() {
   const [categoryFilter, setCategoryFilter] = useState(
     () => new URLSearchParams(location.search).get('category') || 'All'
   )
+  const [currentPage, setCurrentPage] = useState(1)
+  const productsPerPage = 12
 
   function handleAddToCart(product: {
     id: string | number
@@ -42,6 +44,21 @@ export default function CatalogPage() {
     return ['All', ...Array.from(new Set(options))]
   }, [categories])
 
+  function handleCategoryChange(category: string) {
+    setCategoryFilter(category)
+    setCurrentPage(1)
+  }
+
+  function handleSortChange(value: typeof sortBy) {
+    setSortBy(value)
+    setCurrentPage(1)
+  }
+
+  function handleSearchChange(value: string) {
+    setSearchTerm(value)
+    setCurrentPage(1)
+  }
+
   const filteredAndSortedProducts = useMemo(() => {
     const query = searchTerm.trim().toLowerCase()
 
@@ -65,6 +82,22 @@ export default function CatalogPage() {
 
     return items
   }, [products, searchTerm, sortBy, categoryFilter])
+
+  const totalPages = Math.max(1, Math.ceil(filteredAndSortedProducts.length / productsPerPage))
+  const currentProducts = filteredAndSortedProducts.slice(
+    (currentPage - 1) * productsPerPage,
+    currentPage * productsPerPage
+  )
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages)
+    }
+  }, [currentPage, totalPages])
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchTerm, categoryFilter, sortBy])
 
   if (loading) {
     return (
@@ -116,7 +149,7 @@ export default function CatalogPage() {
               className="catalog-search-input"
               placeholder="Search by product name or description..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => handleSearchChange(e.target.value)}
             />
           </div>
 
@@ -128,7 +161,7 @@ export default function CatalogPage() {
               id="catalog-sort"
               value={sortBy}
               className="catalog-sort-select"
-              onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+              onChange={(e) => handleSortChange(e.target.value as typeof sortBy)}
             >
               <option value="featured">Featured</option>
               <option value="low">Price: Low to High</option>
@@ -145,7 +178,7 @@ export default function CatalogPage() {
               id="catalog-category"
               value={categoryFilter}
               className="catalog-sort-select"
-              onChange={(e) => setCategoryFilter(e.target.value)}
+              onChange={(e) => handleCategoryChange(e.target.value)}
             >
               {categoryOptions.map((category) => (
                 <option key={category} value={category}>
@@ -164,7 +197,7 @@ export default function CatalogPage() {
               key={category}
               type="button"
               className={`catalog-category-chip ${categoryFilter === category ? 'active' : ''}`}
-              onClick={() => setCategoryFilter(category)}
+              onClick={() => handleCategoryChange(category)}
             >
               {category}
             </button>
@@ -178,11 +211,46 @@ export default function CatalogPage() {
               : 'No products found in the catalog.'}
           </div>
         ) : (
-          <div className="catalog-grid">
-            {filteredAndSortedProducts.map((product) => (
-              <ProductCard key={product.id} product={product} onAddToCart={handleAddToCart} />
-            ))}
-          </div>
+          <>
+            <div className="catalog-grid">
+              {currentProducts.map((product) => (
+                <ProductCard key={product.id} product={product} onAddToCart={handleAddToCart} />
+              ))}
+            </div>
+
+            <div className="catalog-pagination">
+              <button
+                type="button"
+                className="catalog-page-btn"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+              >
+                Previous
+              </button>
+
+              <div className="catalog-page-indicators">
+                {Array.from({ length: totalPages }, (_, index) => (
+                  <button
+                    key={index + 1}
+                    type="button"
+                    className={`catalog-page-number ${currentPage === index + 1 ? 'active' : ''}`}
+                    onClick={() => setCurrentPage(index + 1)}
+                  >
+                    {index + 1}
+                  </button>
+                ))}
+              </div>
+
+              <button
+                type="button"
+                className="catalog-page-btn"
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+              >
+                Next
+              </button>
+            </div>
+          </>
         )}
       </div>
     </section>

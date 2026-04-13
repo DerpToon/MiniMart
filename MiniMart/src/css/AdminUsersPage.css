@@ -207,6 +207,61 @@
   cursor: wait;
 }
 
+.admin-contact-panel {
+  padding: 1.65rem;
+  border-top: 1px solid #dde5e0;
+}
+
+.admin-contact-list {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.contact-message-card {
+  border: 1px solid #e4ece6;
+  border-radius: 22px;
+  padding: 1.25rem;
+  background: #fbfdfb;
+}
+
+.contact-message-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.85rem;
+}
+
+.contact-message-meta strong {
+  color: var(--heading);
+}
+
+.contact-message-email {
+  margin: 0 0 0.9rem;
+  color: #5f7b6d;
+  font-size: 0.95rem;
+}
+
+.contact-message-body {
+  margin: 0 0 1rem;
+  color: var(--text-soft);
+  line-height: 1.75;
+}
+
+.contact-message-card .review-delete-btn {
+  border-radius: 999px;
+  padding: 0.75rem 1rem;
+  background: #fee2e2;
+  color: #b42318;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.admin-contact-panel p {
+  color: var(--text-soft);
+}
+
 @media (max-width: 768px) {
   .admin-user-empty {
     min-height: 160px;

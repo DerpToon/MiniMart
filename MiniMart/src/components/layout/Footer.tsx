@@ -30,8 +30,8 @@ export default function Footer() {
           <div className="footer-links-block">
             <h4>Quick links</h4>
             <Link to="/">Home</Link>
-            <Link to="/login">Login</Link>
-            <Link to="/register">Register</Link>
+            <Link to="/about">About</Link>
+            <Link to="/contact">Contact</Link>
           </div>
         </div>
       </section>

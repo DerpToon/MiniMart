@@ -117,6 +117,40 @@ export default function HomePage() {
         <section className="home-section">
           <div className="section-heading-row">
             <div>
+              <h2>Built for everyday groceries</h2>
+              <p className="home-section-copy">
+                MiniMart gives you a fast shopping experience with product discovery, cart management,
+                and built-in customer support.
+              </p>
+            </div>
+          </div>
+
+          <div className="home-banner-grid">
+            <div className="home-banner-card dark">
+              <h3>Fresh products in one place</h3>
+              <p>
+                Browse fresh produce, dairy, bakery items, beverages, and more. Everything is easy to
+                explore with category tiles and helpful product details.
+              </p>
+            </div>
+
+            <div className="home-banner-card light">
+              <h3>Need help or want to collaborate?</h3>
+              <p>
+                Send us a message through the contact page and we’ll respond from the admin dashboard.
+                Your feedback helps us improve the shopping experience.
+              </p>
+              <span></span>
+              <Link to="/contact" className="section-link">
+                Contact us
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        <section className="home-section">
+          <div className="section-heading-row">
+            <div>
               <h2>Popular picks from your catalog</h2>
             </div>
 

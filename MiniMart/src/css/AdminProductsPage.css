@@ -261,6 +261,53 @@
   overflow: visible;
 }
 
+.admin-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem 1.5rem;
+}
+
+.admin-pagination span {
+  color: var(--text-soft);
+  font-size: 0.95rem;
+}
+
+.pagination-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.pagination-buttons button {
+  border: 1px solid #dde5e0;
+  background: white;
+  color: var(--heading);
+  border-radius: 12px;
+  min-width: 40px;
+  padding: 0.65rem 0.9rem;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.pagination-buttons button.active,
+.pagination-buttons button:hover:not(:disabled) {
+  background: var(--primary-soft);
+  border-color: var(--primary);
+}
+
+.pagination-buttons button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.admin-empty-row {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-soft);
+}
+
 .admin-products-table {
   width: 100%;
   border-collapse: collapse;

@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { deleteReviewById, getAllProfiles, getReviewsByUserId, updateUserRole } from '../Services/ProfileService'
+import { deleteContactMessage, getContactMessages } from '../Services/ContactService'
 import { getErrorMessage } from '../lib/error'
-import type { Profile, ProductReview } from '../types/db'
+import type { ContactMessage, Profile, ProductReview } from '../types/db'
 import '../css/AdminProductsPage.css'
 import '../css/AdminUsersPage.css'
 
@@ -9,11 +10,15 @@ export default function AdminUsersPage() {
   const [users, setUsers] = useState<Profile[]>([])
   const [selectedUser, setSelectedUser] = useState<Profile | null>(null)
   const [reviewList, setReviewList] = useState<ProductReview[]>([])
+  const [messages, setMessages] = useState<ContactMessage[]>([])
   const [loading, setLoading] = useState(true)
   const [reviewsLoading, setReviewsLoading] = useState(false)
+  const [messagesLoading, setMessagesLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [messagesError, setMessagesError] = useState<string | null>(null)
   const [submittingRole, setSubmittingRole] = useState(false)
   const [deletingReviewId, setDeletingReviewId] = useState<string | null>(null)
+  const [deletingMessageId, setDeletingMessageId] = useState<string | null>(null)
 
   useEffect(() => {
     async function loadUsers() {
@@ -30,7 +35,22 @@ export default function AdminUsersPage() {
       }
     }
 
+    async function loadMessages() {
+      setMessagesLoading(true)
+      setMessagesError(null)
+
+      try {
+        const messageItems = await getContactMessages()
+        setMessages(messageItems)
+      } catch (error: unknown) {
+        setMessagesError(getErrorMessage(error, 'Failed to load contact messages.'))
+      } finally {
+        setMessagesLoading(false)
+      }
+    }
+
     loadUsers()
+    loadMessages()
   }, [])
 
   const userReviewCounts = useMemo(() => {
@@ -100,6 +120,24 @@ export default function AdminUsersPage() {
       setError(getErrorMessage(error, 'Failed to delete review.'))
     } finally {
       setDeletingReviewId(null)
+    }
+  }
+
+  async function handleDeleteContactMessage(message: ContactMessage) {
+    if (!window.confirm('Delete this message? This action cannot be undone.')) {
+      return
+    }
+
+    setDeletingMessageId(message.id)
+    setMessagesError(null)
+
+    try {
+      await deleteContactMessage(message.id)
+      setMessages((prev) => prev.filter((item) => item.id !== message.id))
+    } catch (error: unknown) {
+      setMessagesError(getErrorMessage(error, 'Failed to delete contact message.'))
+    } finally {
+      setDeletingMessageId(null)
     }
   }
 
@@ -214,6 +252,42 @@ export default function AdminUsersPage() {
                   ))}
                 </tbody>
               </table>
+
+              <div className="admin-contact-panel">
+                <div className="admin-table-head">
+                  <h2>Customer messages</h2>
+                  <p>Contact form submissions appear here for review by admin staff.</p>
+                </div>
+
+                {messagesLoading ? (
+                  <p>Loading contact messages...</p>
+                ) : messagesError ? (
+                  <p className="error">{messagesError}</p>
+                ) : messages.length === 0 ? (
+                  <p>No contact messages have been submitted yet.</p>
+                ) : (
+                  <div className="admin-contact-list">
+                    {messages.map((message) => (
+                      <article key={message.id} className="contact-message-card">
+                        <div className="contact-message-meta">
+                          <strong>{message.name}</strong>
+                          <span>{new Date(message.created_at).toLocaleString()}</span>
+                        </div>
+                        <p className="contact-message-email">{message.email}</p>
+                        <p className="contact-message-body">{message.message}</p>
+                        <button
+                          type="button"
+                          className="review-delete-btn"
+                          onClick={() => handleDeleteContactMessage(message)}
+                          disabled={deletingMessageId === message.id}
+                        >
+                          {deletingMessageId === message.id ? 'Deleting...' : 'Delete message'}
+                        </button>
+                      </article>
+                    ))}
+                  </div>
+                )}
+              </div>
 
               {selectedUser && (
                 <div className="admin-user-reviews-panel">

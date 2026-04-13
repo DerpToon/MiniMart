@@ -43,6 +43,8 @@ export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null)
+  const [currentPage, setCurrentPage] = useState(1)
+  const ordersPerPage = 10
 
   useEffect(() => {
     async function loadOrders() {
@@ -58,6 +60,18 @@ export default function AdminOrdersPage() {
 
     loadOrders()
   }, [])
+
+  const totalOrderPages = Math.max(1, Math.ceil(orders.length / ordersPerPage))
+  const currentOrders = useMemo(() => {
+    const start = (currentPage - 1) * ordersPerPage
+    return orders.slice(start, start + ordersPerPage)
+  }, [orders, currentPage])
+
+  useEffect(() => {
+    if (currentPage > totalOrderPages) {
+      setCurrentPage(1)
+    }
+  }, [currentPage, totalOrderPages])
 
   const stats = useMemo(() => {
     const totalRevenue = orders.reduce((sum, order) => sum + (Number(order.total) || 0), 0)
@@ -249,6 +263,31 @@ export default function AdminOrdersPage() {
               </tbody>
             </table>
           </div>
+          {totalOrderPages > 1 && (
+            <div className="admin-pagination">
+              <span>
+                Showing {currentOrders.length ? (currentPage - 1) * ordersPerPage + 1 : 0} - {(currentPage - 1) * ordersPerPage + currentOrders.length} of {orders.length}
+              </span>
+              <div className="pagination-buttons">
+                <button type="button" disabled={currentPage === 1} onClick={() => setCurrentPage((page) => page - 1)}>
+                  Previous
+                </button>
+                {Array.from({ length: totalOrderPages }, (_, index) => index + 1).map((page) => (
+                  <button
+                    key={page}
+                    type="button"
+                    className={page === currentPage ? 'active' : ''}
+                    onClick={() => setCurrentPage(page)}
+                  >
+                    {page}
+                  </button>
+                ))}
+                <button type="button" disabled={currentPage === totalOrderPages} onClick={() => setCurrentPage((page) => page + 1)}>
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
         </section>
       </div>
     </section>

@@ -58,6 +58,14 @@ export type ProductReview = {
   created_at: string
 }
 
+export type ContactMessage = {
+  id: string
+  name: string
+  email: string
+  message: string
+  created_at: string
+}
+
 export type Order = {
   id: string
   user_id: string

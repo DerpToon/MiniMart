@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useCategories } from '../hooks/useCategories'
 import { useProducts } from '../hooks/useProducts'
 import { getErrorMessage } from '../lib/error'
@@ -47,6 +47,8 @@ export default function AdminProductsPage() {
   const [minPrice, setMinPrice] = useState(0)
   const [maxPrice, setMaxPrice] = useState(500)
   const [selectedCategory, setSelectedCategory] = useState('All')
+  const [currentPage, setCurrentPage] = useState(1)
+  const productsPerPage = 10
   const [brokenImageIds, setBrokenImageIds] = useState<Record<string, true>>({})
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -66,6 +68,16 @@ export default function AdminProductsPage() {
       return matchesName && matchesPrice && matchesCategory
     })
   }, [products, searchTerm, minPrice, maxPrice, selectedCategory])
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchTerm, minPrice, maxPrice, selectedCategory, products.length])
+
+  const totalProductPages = Math.max(1, Math.ceil(filteredProducts.length / productsPerPage))
+  const currentProducts = useMemo(() => {
+    const start = (currentPage - 1) * productsPerPage
+    return filteredProducts.slice(start, start + productsPerPage)
+  }, [filteredProducts, currentPage])
 
   async function handleSmartCreate(data: ProductFormData, file?: File) {
     const existing = products.find((product) => product.name.toLowerCase() === data.name.toLowerCase())
@@ -344,7 +356,7 @@ export default function AdminProductsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredProducts.map((product) => (
+                  {currentProducts.length > 0 ? currentProducts.map((product) => (
                     <tr key={product.id}>
                       <td>
                         <div className="admin-product-cell">
@@ -384,10 +396,41 @@ export default function AdminProductsPage() {
                         </div>
                       </td>
                     </tr>
-                  ))}
+                  )) : (
+                    <tr>
+                      <td colSpan={6} className="admin-empty-row">
+                        No products match current filters.
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
+            {totalProductPages > 1 && (
+              <div className="admin-pagination">
+                <span>
+                  Showing {currentProducts.length ? (currentPage - 1) * productsPerPage + 1 : 0} - {(currentPage - 1) * productsPerPage + currentProducts.length} of {filteredProducts.length}
+                </span>
+                <div className="pagination-buttons">
+                  <button type="button" disabled={currentPage === 1} onClick={() => setCurrentPage((page) => page - 1)}>
+                    Previous
+                  </button>
+                  {Array.from({ length: totalProductPages }, (_, index) => index + 1).map((page) => (
+                    <button
+                      key={page}
+                      type="button"
+                      className={page === currentPage ? 'active' : ''}
+                      onClick={() => setCurrentPage(page)}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                  <button type="button" disabled={currentPage === totalProductPages} onClick={() => setCurrentPage((page) => page + 1)}>
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
           </main>
         </div>
       </div>
