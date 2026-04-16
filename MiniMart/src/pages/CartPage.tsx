@@ -8,6 +8,7 @@ export default function CartPage() {
   const { cart, addToCart, decreaseQuantity, removeFromCart, clearCart, getTotal } = useCart()
   const { submitOrder, loading, error } = useOrder()
   const navigate = useNavigate()
+  const fallbackImage = 'https://via.placeholder.com/180x180?text=MiniMart'
 
   const subtotal = getTotal()
   const shipping = subtotal > 50 ? 0 : 5.99
@@ -32,12 +33,39 @@ export default function CartPage() {
       <section className="cart-page">
         <div className="cart-container">
           <div className="cart-empty-state">
-            <span className="cart-empty-icon">🛒</span>
-            <h1>Your cart is empty</h1>
-            <p>Add a few products from the catalog and come back here to check out.</p>
-            <button className="cart-primary-btn" onClick={() => navigate('/catalog')} type="button">
-              Start shopping
-            </button>
+            <div className="cart-empty-inner">
+              <span className="cart-empty-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M5 6h1.4c.3 0 .57.2.65.49L7.4 8H18a1 1 0 0 1 .97 1.24l-1.1 4.2a1 1 0 0 1-.97.76H9.1a1 1 0 0 1-.97-.76L6.2 5.8A1 1 0 0 0 5.23 5H5"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M10 19a1 1 0 1 0 0 .01M16 19a1 1 0 1 0 0 .01"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </span>
+
+              <div className="cart-empty-copy">
+                <h1>Your cart is empty</h1>
+                <p>Add a few products from the catalog and come back here to check out.</p>
+              </div>
+
+              <button
+                className="cart-primary-btn cart-empty-cta"
+                onClick={() => navigate('/catalog')}
+                type="button"
+              >
+                Start shopping
+              </button>
+            </div>
           </div>
         </div>
       </section>
@@ -48,9 +76,9 @@ export default function CartPage() {
     <section className="cart-page">
       <div className="cart-container">
         <div className="cart-heading-row">
-          <div>
-            <p className="cart-kicker">Cart</p>
+          <div className="cart-heading-copy">
             <h1>Review your items</h1>
+            <p>{cart.length} {cart.length === 1 ? 'item' : 'items'} ready for checkout.</p>
           </div>
           <button className="cart-clear-btn" type="button" onClick={clearCart}>
             Clear cart
@@ -64,9 +92,13 @@ export default function CartPage() {
                 <div className="cart-item-left">
                   <div className="cart-item-image-wrap">
                     <img
-                      src={item.image_url || 'https://via.placeholder.com/180x180?text=MiniMart'}
+                      src={item.image_url || fallbackImage}
                       alt={item.name}
                       className="cart-item-image"
+                      onError={({ currentTarget }) => {
+                        currentTarget.onerror = null
+                        currentTarget.src = fallbackImage
+                      }}
                     />
                   </div>
 
@@ -90,7 +122,7 @@ export default function CartPage() {
                       onClick={() => decreaseQuantity(item.product_id)}
                       disabled={item.quantity <= 1}
                     >
-                      −
+                      -
                     </button>
                     <span>{item.quantity}</span>
                     <button

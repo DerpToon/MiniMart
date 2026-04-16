@@ -191,19 +191,6 @@ export default function CatalogPage() {
           <div className="catalog-summary-chip">{filteredAndSortedProducts.length} items found</div>
         </section>
 
-        <section className="catalog-category-chips">
-          {categoryOptions.map((category) => (
-            <button
-              key={category}
-              type="button"
-              className={`catalog-category-chip ${categoryFilter === category ? 'active' : ''}`}
-              onClick={() => handleCategoryChange(category)}
-            >
-              {category}
-            </button>
-          ))}
-        </section>
-
         {filteredAndSortedProducts.length === 0 ? (
           <div className="catalog-state">
             {searchTerm.trim()

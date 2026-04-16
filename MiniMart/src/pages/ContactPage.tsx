@@ -1,7 +1,15 @@
-import { FormEvent, useState } from 'react'
-import { sendContactMessage } from '../Services/ContactService'
+import type { FormEvent } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { sendContactMessage } from '../Services/ContactService'
+import contactHeroImage from '../assets/contact-hero-market.jpg'
 import '../css/ContactPage.css'
+
+const messageTips = [
+  'Your order number if the message is about a recent purchase.',
+  'The product name or category if you are asking about stock.',
+  'A clear email address so the MiniMart team can follow up quickly.'
+] as const
 
 export default function ContactPage() {
   const [name, setName] = useState('')
@@ -41,38 +49,57 @@ export default function ContactPage() {
   return (
     <section className="contact-page">
       <div className="contact-shell">
-        <header className="contact-hero">
-          <div>
+        <header
+          className="contact-hero"
+          style={{
+            backgroundImage: `linear-gradient(
+              90deg,
+              rgba(9, 33, 25, 0.78) 0%,
+              rgba(11, 39, 30, 0.66) 32%,
+              rgba(12, 44, 34, 0.44) 58%,
+              rgba(12, 44, 34, 0.2) 80%,
+              rgba(12, 44, 34, 0.08) 100%
+            ), url(${contactHeroImage})`,
+            backgroundPosition: 'center center'
+          }}
+        >
+          <div className="contact-hero-copy">
             <p className="contact-kicker">Contact us</p>
-            <h1>Send a message and we'll get back to you quickly.</h1>
+            <h1>Questions about an order or today&apos;s groceries? Contact MiniMart.</h1>
             <p>
-              Have a question about an order, a product, or the MiniMart experience? Use the form below
-              and our team will review your message in the admin dashboard.
+              Whether you need help with delivery, want to ask about product availability, or just have
+              feedback for the store, send us a message and the MiniMart team will review it quickly.
             </p>
-            <Link to="/about" className="contact-hero-link">
-              Learn more about MiniMart
-            </Link>
+            <div className="contact-hero-actions">
+              <Link to="/about" className="contact-hero-link">
+                Learn more about MiniMart
+              </Link>
+            </div>
           </div>
         </header>
 
         <div className="contact-content">
           <aside className="contact-info-card">
-            <h2>Need help fast?</h2>
+            <p className="contact-info-kicker">MiniMart support</p>
+            <h2>What to include</h2>
             <p>
-              We monitor customer messages directly from the admin dashboard, so your request will be
-              visible to our team right away.
+              A little detail helps us respond faster and gives the store team enough context to help
+              with your request the first time.
             </p>
-            <ul>
-              <li>General questions</li>
-              <li>Product feedback</li>
-              <li>Cart or order support</li>
-              <li>Feature requests</li>
-            </ul>
+
+            <div className="contact-tip-list">
+              {messageTips.map((tip, index) => (
+                <div key={tip} className="contact-tip-item">
+                  <span className="contact-tip-index">0{index + 1}</span>
+                  <p>{tip}</p>
+                </div>
+              ))}
+            </div>
           </aside>
 
           <main className="contact-form-card">
             <h2>Send us a message</h2>
-            <p>We’ll review your message in the admin panel and follow up if needed.</p>
+            <p>We&apos;ll review your message and follow up if we need anything else.</p>
 
             <form className="contact-form" onSubmit={handleSubmit}>
               <label>

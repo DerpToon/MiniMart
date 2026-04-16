@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react'
 import { Link } from 'react-router-dom'
 import { useCart } from '../hooks/useCart'
 import { useProducts } from '../hooks/useProducts'
@@ -6,25 +7,107 @@ import ProductCard from '../components/product/ProductCard'
 import heroBackground from '../assets/grocery-hero.jpg'
 import '../css/HomePage.css'
 
-const defaultCategories = [
-  { title: 'Vegetables', text: 'Fresh greens and everyday essentials', icon: '🥬' },
-  { title: 'Fruits', text: 'Sweet, healthy and ready to deliver', icon: '🍎' },
-  { title: 'Dairy', text: 'Milk, cheese and chilled basics', icon: '🥛' },
-  { title: 'Bakery', text: 'Breads and snacks for quick orders', icon: '🥐' },
-  { title: 'Meat', text: 'Fresh cuts ready for the grill or oven', icon: '🥩' },
-  { title: 'Beverages', text: 'Cold drinks and pantry refreshments', icon: '🥤' }
-]
+type CategoryCard = {
+  title: string
+  text: string
+  icon: string
+  style: CSSProperties
+}
 
 const categoryIcons: Record<string, string> = {
-  Vegetables: '🥬',
-  Fruits: '🍎',
-  Dairy: '🥛',
-  Bakery: '🥐',
-  Pantry: '🛒',
-  Snacks: '🍪',
-  Meat: '🥩',
-  Beverages: '🥤',
-  Drinks: '🥤'
+  Vegetables: '\u{1F96C}',
+  Fruits: '\u{1F34E}',
+  Dairy: '\u{1F95B}',
+  Bakery: '\u{1F950}',
+  Pantry: '\u{1F6D2}',
+  Snacks: '\u{1F36A}',
+  Meat: '\u{1F969}',
+  Beverages: '\u{1F964}',
+  Drinks: '\u{1F964}'
+}
+
+const fallbackCategoryNames = [
+  'Bakery',
+  'Dairy',
+  'Drinks',
+  'Fruits',
+  'Meat',
+  'Pantry',
+  'Snacks',
+  'Vegetables'
+]
+
+const categoryMeta: Record<
+  string,
+  {
+    text: string
+    accent: string
+    accentSoft: string
+  }
+> = {
+  Bakery: {
+    text: 'Warm bakes and morning favorites',
+    accent: '#b86a3d',
+    accentSoft: '#f8ece3'
+  },
+  Dairy: {
+    text: 'Chilled basics and creamy staples',
+    accent: '#5f8dcf',
+    accentSoft: '#eaf2ff'
+  },
+  Drinks: {
+    text: 'Cold refreshers and everyday sips',
+    accent: '#c54f9b',
+    accentSoft: '#fae8f4'
+  },
+  Beverages: {
+    text: 'Cold refreshers and everyday sips',
+    accent: '#c54f9b',
+    accentSoft: '#fae8f4'
+  },
+  Fruits: {
+    text: 'Sweet picks for snacking and juice',
+    accent: '#cf4f5f',
+    accentSoft: '#fdebed'
+  },
+  Meat: {
+    text: 'Fresh cuts for dinner and grilling',
+    accent: '#cd5a5a',
+    accentSoft: '#fdecea'
+  },
+  Pantry: {
+    text: 'Stock up on everyday cupboard staples',
+    accent: '#5a89a8',
+    accentSoft: '#e8f2f7'
+  },
+  Snacks: {
+    text: 'Crunchy, sweet, and easy to grab',
+    accent: '#b67843',
+    accentSoft: '#f8eee3'
+  },
+  Vegetables: {
+    text: 'Leafy greens and everyday freshness',
+    accent: '#6c9640',
+    accentSoft: '#edf5e4'
+  }
+}
+
+function buildCategoryCard(title: string): CategoryCard {
+  const meta = categoryMeta[title] ?? {
+    text: `Browse ${title.toLowerCase()}`,
+    accent: '#1b6b59',
+    accentSoft: '#ecf4f1'
+  }
+
+  return {
+    title,
+    text: meta.text,
+    icon: categoryIcons[title] ?? '\u{1F6D2}',
+    style: {
+      '--category-accent': meta.accent,
+      '--category-soft': meta.accentSoft
+    } as CSSProperties
+  }
 }
 
 export default function HomePage() {
@@ -32,14 +115,10 @@ export default function HomePage() {
   const { categories: dbCategories } = useCategories()
   const { addToCart } = useCart()
 
-  const categories =
+  const categories: CategoryCard[] =
     dbCategories.length > 0
-      ? dbCategories.map((category) => ({
-          title: category.name,
-          text: `Shop ${category.name.toLowerCase()}`,
-          icon: categoryIcons[category.name] ?? '🛒'
-        }))
-      : defaultCategories
+      ? dbCategories.map((category) => buildCategoryCard(category.name))
+      : fallbackCategoryNames.map((categoryName) => buildCategoryCard(categoryName))
 
   function handleAddToCart(product: {
     id: string | number
@@ -105,10 +184,28 @@ export default function HomePage() {
                 to={`/catalog?category=${encodeURIComponent(category.title)}`}
                 className="category-tile"
                 key={category.title}
+                style={category.style}
               >
-                <span className="category-icon">{category.icon}</span>
-                <h3>{category.title}</h3>
-                <p>{category.text}</p>
+                <span className="category-icon" aria-hidden="true">
+                  {category.icon}
+                </span>
+
+                <div className="category-copy">
+                  <h3>{category.title}</h3>
+                  <p>{category.text}</p>
+                </div>
+
+                <span className="category-arrow" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M8 16L16 8M10 8H16V14"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </span>
               </Link>
             ))}
           </div>
@@ -137,11 +234,10 @@ export default function HomePage() {
             <div className="home-banner-card light">
               <h3>Need help or want to collaborate?</h3>
               <p>
-                Send us a message through the contact page and we’ll respond from the admin dashboard.
-                Your feedback helps us improve the shopping experience.
+                Send us a message through the contact page and we&apos;ll respond from the admin
+                dashboard. Your feedback helps us improve the shopping experience.
               </p>
-              <span></span>
-              <Link to="/contact" className="section-link">
+              <Link to="/contact" className="section-link home-banner-link">
                 Contact us
               </Link>
             </div>

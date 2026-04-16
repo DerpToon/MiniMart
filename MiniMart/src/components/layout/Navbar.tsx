@@ -35,19 +35,18 @@ export default function Navbar() {
   return (
     <header className="site-navbar">
       <div className="navbar-shell">
-        <div className="navbar-left">
-          <Link to="/" className="navbar-brand" aria-label="MiniMart home">
-            <div className="brand-mark">
-              <img src="/logo.png" alt="MiniMart" className="brand-logo" />
-            </div>
+        <Link to="/" className="navbar-brand" aria-label="MiniMart home">
+          <div className="brand-mark">
+            <img src="/logo.png" alt="MiniMart" className="brand-logo" />
+          </div>
 
-            <div>
-              <span className="brand-title">MiniMart</span>
-              <span className="brand-subtitle">Fresh. Fast. Simple.</span>
-            </div>
-          </Link>
+          <div>
+            <span className="brand-title">MiniMart</span>
+            <span className="brand-subtitle">Fresh. Fast. Simple.</span>
+          </div>
+        </Link>
 
-          <nav className="navbar-links">
+        <nav className="navbar-links">
             <NavLink to="/" end className={({ isActive }) => `nav-pill ${isActive ? 'active' : ''}`}>
               Home
             </NavLink>
@@ -69,8 +68,7 @@ export default function Navbar() {
                 My Orders
               </NavLink>
             )}
-          </nav>
-        </div>
+        </nav>
 
         <div className="navbar-right">
           <div className="navbar-search-shell">

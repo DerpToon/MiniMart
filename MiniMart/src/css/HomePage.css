@@ -117,45 +117,98 @@
 .category-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 1rem;
+  gap: 1.15rem;
 }
 
 .category-tile {
-  background: linear-gradient(180deg, #ffffff, #f7fbf8);
-  border: 1px solid rgba(87, 161, 122, 0.2);
+  --category-accent: #1b6b59;
+  --category-soft: #ecf4f1;
+  position: relative;
+  display: block;
+  background: #ffffff;
+  border: 1px solid rgba(23, 50, 44, 0.1);
   border-radius: 28px;
-  padding: 1.6rem;
-  box-shadow: 0 20px 50px rgba(40, 84, 63, 0.06);
-  transition: transform 0.24s ease, box-shadow 0.24s ease, border-color 0.24s ease;
+  padding: 1.6rem 1.6rem 4.4rem;
+  min-height: 214px;
+  box-shadow: 0 12px 32px rgba(17, 37, 32, 0.05);
+  transition:
+    transform 0.24s ease,
+    box-shadow 0.24s ease,
+    border-color 0.24s ease;
   text-decoration: none;
   color: inherit;
 }
 
 .category-tile:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 24px 70px rgba(40, 84, 63, 0.1);
-  border-color: rgba(87, 161, 122, 0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 18px 42px rgba(17, 37, 32, 0.08);
+  border-color: rgba(23, 50, 44, 0.16);
+}
+
+.category-copy {
+  margin-top: 1.35rem;
 }
 
 .category-tile h3 {
-  margin: 1.2rem 0 0.5rem;
+  margin: 0 0 0.55rem;
   color: var(--heading);
+  font-size: 1.48rem;
+  letter-spacing: -0.03em;
 }
 
 .category-icon {
-  width: 70px;
-  height: 70px;
-  border-radius: 22px;
+  width: 68px;
+  height: 68px;
+  border-radius: 20px;
   display: grid;
   place-items: center;
-  background: linear-gradient(135deg, #d7f3e3, #ecf7ef);
+  background: var(--category-soft);
+  color: var(--category-accent);
   font-size: 1.7rem;
+  transition: transform 0.24s ease, background-color 0.24s ease;
 }
 
 .category-tile p {
   margin: 0.75rem 0 0;
   color: var(--text-soft);
-  line-height: 1.75;
+  line-height: 1.72;
+  max-width: 26ch;
+}
+
+.category-arrow {
+  position: absolute;
+  right: 1.35rem;
+  bottom: 1.25rem;
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  color: var(--category-accent);
+  border: 1px solid rgba(23, 50, 44, 0.12);
+  transition:
+    transform 0.24s ease,
+    border-color 0.24s ease,
+    background-color 0.24s ease,
+    color 0.24s ease;
+}
+
+.category-arrow svg {
+  width: 18px;
+  height: 18px;
+}
+
+.category-tile:hover .category-icon {
+  transform: translateY(-2px);
+}
+
+.category-tile:hover .category-arrow {
+  transform: translate(2px, -2px);
+  background: var(--category-accent);
+  color: #ffffff;
+  border-color: var(--category-accent);
 }
 
 .home-product-grid {
@@ -181,20 +234,25 @@
 .home-banner-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
+  gap: 1.15rem;
   margin-top: 2.4rem;
 }
 
 .home-banner-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.05rem;
   border-radius: 32px;
   padding: 2rem;
-  box-shadow: var(--shadow-sm);
-  min-height: 220px;
+  min-height: 230px;
+  box-shadow: 0 18px 44px rgba(16, 39, 32, 0.06);
 }
 
 .home-banner-card.dark {
-  background: linear-gradient(135deg, #102f29, #1a6455);
+  background: #173c34;
   color: white;
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .home-banner-card.light {
@@ -203,19 +261,23 @@
 }
 
 .home-banner-card h3 {
-  margin: 0 0 1rem;
-  font-size: 1.55rem;
+  margin: 0;
+  font-size: clamp(1.6rem, 2vw, 2rem);
+  line-height: 1.18;
+  letter-spacing: -0.03em;
+  max-width: 18ch;
 }
 
 .home-banner-card p {
   margin: 0;
   color: inherit;
   opacity: 0.9;
-  line-height: 1.7;
+  line-height: 1.75;
+  max-width: 58ch;
 }
 
-.home-banner-card .section-link {
-  margin-top: 1.4rem;
+.home-banner-link {
+  margin-top: auto;
 }
 
 .section-kicker.light {
@@ -227,7 +289,7 @@
   .category-grid,
   .home-product-grid,
   .home-banner-grid {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
   }
 
   .hero-panel {
@@ -256,5 +318,20 @@
   .section-heading-row {
     flex-direction: column;
     align-items: start;
+  }
+
+  .category-tile {
+    min-height: 198px;
+    padding: 1.35rem 1.35rem 4rem;
+  }
+
+  .home-banner-card {
+    padding: 1.6rem;
+    min-height: unset;
+  }
+
+  .home-banner-card h3 {
+    max-width: none;
+    font-size: 1.6rem;
   }
 }
