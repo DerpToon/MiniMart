@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCart } from '../hooks/useCart'
 import { useOrder } from '../hooks/useOrder'
@@ -17,6 +17,8 @@ export default function CartPage() {
   const [expiryDate, setExpiryDate] = useState('')
   const [securityCode, setSecurityCode] = useState('')
   const [checkoutFormError, setCheckoutFormError] = useState<string | null>(null)
+  const [successMessage, setSuccessMessage] = useState('')
+  const [successFadeOut, setSuccessFadeOut] = useState(false)
 
   const subtotal = getTotal()
   const shipping = subtotal > 50 ? 0 : 5.99
@@ -61,13 +63,36 @@ export default function CartPage() {
       closeCheckout()
       resetPaymentForm()
       clearCart()
-      alert(`Checkout successful! Order ID: ${orderId}`)
-      navigate('/orders')
+      setSuccessFadeOut(false)
+      setSuccessMessage(`Order placed successfully! Order ID: ${orderId}`)
     } catch (error: unknown) {
       console.error(error)
+      setSuccessMessage('')
+      setSuccessFadeOut(false)
       alert(`Checkout failed: ${getErrorMessage(error, 'Unable to place order.')}`)
     }
   }
+
+  useEffect(() => {
+    if (!successMessage) {
+      setSuccessFadeOut(false)
+      return
+    }
+
+    const fadeTimer = window.setTimeout(() => {
+      setSuccessFadeOut(true)
+    }, 4200)
+
+    const clearTimer = window.setTimeout(() => {
+      setSuccessMessage('')
+      setSuccessFadeOut(false)
+    }, 5000)
+
+    return () => {
+      window.clearTimeout(fadeTimer)
+      window.clearTimeout(clearTimer)
+    }
+  }, [successMessage])
 
   if (cart.length === 0) {
     return (
@@ -75,29 +100,40 @@ export default function CartPage() {
         <div className="cart-container">
           <div className="cart-empty-state">
             <div className="cart-empty-inner">
-              <span className="cart-empty-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path
-                    d="M5 6h1.4c.3 0 .57.2.65.49L7.4 8H18a1 1 0 0 1 .97 1.24l-1.1 4.2a1 1 0 0 1-.97.76H9.1a1 1 0 0 1-.97-.76L6.2 5.8A1 1 0 0 0 5.23 5H5"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M10 19a1 1 0 1 0 0 .01M16 19a1 1 0 1 0 0 .01"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </span>
-
-              <div className="cart-empty-copy">
-                <h1>Your cart is empty</h1>
-                <p>Add a few products from the catalog and come back here to check out.</p>
+        {successMessage && (
+          <div className="cart-success-box cart-success-box-empty" role="status">
+            <div className="cart-success-box-top">
+              <span className="cart-success-icon" aria-hidden="true">✓</span>
+              <div>
+                <strong>{successMessage}</strong>
               </div>
+            </div>
+          </div>
+        )}
+
+        <span className="cart-empty-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path
+              d="M5 6h1.4c.3 0 .57.2.65.49L7.4 8H18a1 1 0 0 1 .97 1.24l-1.1 4.2a1 1 0 0 1-.97.76H9.1a1 1 0 0 1-.97-.76L6.2 5.8A1 1 0 0 0 5.23 5H5"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M10 19a1 1 0 1 0 0 .01M16 19a1 1 0 1 0 0 .01"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </span>
+
+        <div className="cart-empty-copy">
+          <h1>Your cart is empty</h1>
+          <p>Add a few products from the catalog and come back here to check out.</p>
+        </div>
 
               <button
                 className="cart-primary-btn cart-empty-cta"
@@ -125,6 +161,17 @@ export default function CartPage() {
             Clear cart
           </button>
         </div>
+
+        {successMessage && (
+          <div className={`cart-success-box ${successFadeOut ? 'fade-out' : ''}`} role="status">
+            <div className="cart-success-box-top">
+              <span className="cart-success-icon" aria-hidden="true">✓</span>
+              <div>
+                <strong>{successMessage}</strong>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="cart-layout">
           <div className="cart-items-panel">

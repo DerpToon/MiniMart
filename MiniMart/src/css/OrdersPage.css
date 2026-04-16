@@ -10,6 +10,8 @@
 
 .orders-header {
   margin-bottom: 1.7rem;
+  display: grid;
+  gap: 1.15rem;
 }
 
 .orders-header-top {
@@ -18,6 +20,55 @@
   align-items: flex-end;
   gap: 1rem;
   flex-wrap: wrap;
+}
+
+.orders-filter-panel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-end;
+  padding: 1rem 1.2rem;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(27, 107, 89, 0.12);
+  border-radius: 26px;
+}
+
+.orders-filter-field {
+  display: grid;
+  gap: 0.45rem;
+  min-width: 180px;
+}
+
+.orders-filter-label {
+  color: var(--heading);
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.orders-filter-field input {
+  width: 100%;
+  border: 1px solid #d9e6dd;
+  border-radius: 16px;
+  padding: 0.85rem 1rem;
+  background: #ffffff;
+  color: var(--heading);
+  font: inherit;
+}
+
+.orders-reset-btn {
+  border: 1px solid #cedbd5;
+  border-radius: 999px;
+  padding: 0.9rem 1.15rem;
+  background: white;
+  color: var(--heading);
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.orders-reset-btn:hover {
+  background: #f6fbf7;
+  border-color: #1f654b;
 }
 
 .orders-header h1 {

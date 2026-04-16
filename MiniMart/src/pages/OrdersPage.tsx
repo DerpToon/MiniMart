@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { useMemo, useState } from 'react'
 import { useOrders } from '../hooks/useOrders'
 import { useOrderItems } from '../hooks/useOrderItems'
 import '../css/OrdersPage.css'
@@ -104,6 +105,20 @@ function OrderItems({ orderId }: { orderId: string }) {
 
 export default function OrdersPage() {
   const { orders, loading, error } = useOrders()
+  const [fromDate, setFromDate] = useState('')
+  const [toDate, setToDate] = useState('')
+
+  const filteredOrders = useMemo(() => {
+    const fromTimestamp = fromDate ? new Date(fromDate).setHours(0, 0, 0, 0) : -Infinity
+    const toTimestamp = toDate ? new Date(toDate).setHours(23, 59, 59, 999) : Infinity
+
+    return orders.filter((order) => {
+      const createdTimestamp = new Date(order.created_at).getTime()
+      return createdTimestamp >= fromTimestamp && createdTimestamp <= toTimestamp
+    })
+  }, [orders, fromDate, toDate])
+
+  const hasActiveDateFilter = fromDate !== '' || toDate !== ''
 
   if (loading) {
     return (
@@ -139,10 +154,49 @@ export default function OrdersPage() {
 
             {orders.length > 0 && (
               <div className="orders-count-pill">
-                {orders.length} {orders.length === 1 ? 'order' : 'orders'}
+                {hasActiveDateFilter
+                  ? `${filteredOrders.length} of ${orders.length} orders`
+                  : `${orders.length} ${orders.length === 1 ? 'order' : 'orders'}`}
               </div>
             )}
           </div>
+
+          {orders.length > 0 && (
+            <div className="orders-filter-panel">
+              <div className="orders-filter-field">
+                <label htmlFor="order-date-from" className="orders-filter-label">From</label>
+                <input
+                  id="order-date-from"
+                  type="date"
+                  value={fromDate}
+                  onChange={(event) => setFromDate(event.target.value)}
+                />
+              </div>
+
+              <div className="orders-filter-field">
+                <label htmlFor="order-date-to" className="orders-filter-label">To</label>
+                <input
+                  id="order-date-to"
+                  type="date"
+                  value={toDate}
+                  onChange={(event) => setToDate(event.target.value)}
+                />
+              </div>
+
+              {hasActiveDateFilter && (
+                <button
+                  type="button"
+                  className="orders-reset-btn"
+                  onClick={() => {
+                    setFromDate('')
+                    setToDate('')
+                  }}
+                >
+                  Reset
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
         {orders.length === 0 ? (
@@ -155,30 +209,40 @@ export default function OrdersPage() {
             </Link>
           </div>
         ) : (
-          <div className="orders-list">
-            {orders.map((order) => (
-              <article className="order-card" key={order.id}>
-                <div className="order-card-header">
-                  <div className="order-card-main">
-                    <h2>Order #{order.id.slice(0, 8)}</h2>
-                    <p className="order-card-date">
-                      Placed on {formatDate(order.created_at)} at {formatTime(order.created_at)}
-                    </p>
-                    <span className={getStatusClass(order.status)}>{formatStatusLabel(order.status)}</span>
-                  </div>
+          <>
+            {filteredOrders.length === 0 ? (
+              <div className="orders-empty-card">
+                <p className="orders-empty-kicker">No orders found</p>
+                <h2>Try a different date range.</h2>
+                <p>Adjust the From/To filters above to find orders by purchase date.</p>
+              </div>
+            ) : (
+              <div className="orders-list">
+                {filteredOrders.map((order) => (
+                  <article className="order-card" key={order.id}>
+                    <div className="order-card-header">
+                      <div className="order-card-main">
+                        <h2>Order #{order.id.slice(0, 8)}</h2>
+                        <p className="order-card-date">
+                          Placed on {formatDate(order.created_at)} at {formatTime(order.created_at)}
+                        </p>
+                        <span className={getStatusClass(order.status)}>{formatStatusLabel(order.status)}</span>
+                      </div>
 
-                  <div className="order-card-meta">
-                    <div className="order-total-block">
-                      <span className="order-total-label">Order total</span>
-                      <strong>{formatCurrency(Number(order.total) || 0)}</strong>
+                      <div className="order-card-meta">
+                        <div className="order-total-block">
+                          <span className="order-total-label">Order total</span>
+                          <strong>{formatCurrency(Number(order.total) || 0)}</strong>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
 
-                <OrderItems orderId={order.id} />
-              </article>
-            ))}
-          </div>
+                    <OrderItems orderId={order.id} />
+                  </article>
+                ))}
+              </div>
+            )}
+          </>
         )}
       </div>
     </section>
