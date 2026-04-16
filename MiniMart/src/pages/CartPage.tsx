@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCart } from '../hooks/useCart'
 import { useOrder } from '../hooks/useOrder'
@@ -9,16 +10,56 @@ export default function CartPage() {
   const { submitOrder, loading, error } = useOrder()
   const navigate = useNavigate()
   const fallbackImage = 'https://via.placeholder.com/180x180?text=MiniMart'
+  const [checkoutOpen, setCheckoutOpen] = useState(false)
+  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card'>('cash')
+  const [cardholderName, setCardholderName] = useState('')
+  const [cardNumber, setCardNumber] = useState('')
+  const [expiryDate, setExpiryDate] = useState('')
+  const [securityCode, setSecurityCode] = useState('')
+  const [checkoutFormError, setCheckoutFormError] = useState<string | null>(null)
 
   const subtotal = getTotal()
   const shipping = subtotal > 50 ? 0 : 5.99
   const total = subtotal + shipping
+  const remainingForFreeShipping = Math.max(0, 50 - subtotal)
+  const itemCountLabel = `${cart.length} ${cart.length === 1 ? 'item' : 'items'}`
+
+  function openCheckout() {
+    if (cart.length === 0) return
+    setCheckoutFormError(null)
+    setCheckoutOpen(true)
+  }
+
+  function closeCheckout() {
+    if (loading) return
+    setCheckoutFormError(null)
+    setCheckoutOpen(false)
+  }
+
+  function resetPaymentForm() {
+    setPaymentMethod('cash')
+    setCardholderName('')
+    setCardNumber('')
+    setExpiryDate('')
+    setSecurityCode('')
+    setCheckoutFormError(null)
+  }
 
   async function handleCheckout() {
     if (cart.length === 0) return
 
+    if (paymentMethod === 'card') {
+      const hasMissingCardDetails = !cardholderName.trim() || !cardNumber.trim() || !expiryDate.trim() || !securityCode.trim()
+      if (hasMissingCardDetails) {
+        setCheckoutFormError('Enter the demo payment details before placing the order.')
+        return
+      }
+    }
+
     try {
       const orderId = await submitOrder(cart, total)
+      closeCheckout()
+      resetPaymentForm()
       clearCart()
       alert(`Checkout successful! Order ID: ${orderId}`)
       navigate('/orders')
@@ -149,33 +190,221 @@ export default function CartPage() {
 
           <aside className="cart-summary-panel">
             <div className="cart-summary-card">
-              <h2>Order summary</h2>
+              <div className="cart-summary-head">
+                <div>
+                  <span className="cart-summary-kicker">Checkout</span>
+                  <h2>Order summary</h2>
+                </div>
+                <span className="cart-summary-count">{itemCountLabel}</span>
+              </div>
 
-              <div className="summary-row">
-                <span>Subtotal</span>
-                <strong>${subtotal.toFixed(2)}</strong>
-              </div>
-              <div className="summary-row">
-                <span>Shipping</span>
-                <strong>{shipping === 0 ? 'Free' : `$${shipping.toFixed(2)}`}</strong>
-              </div>
-              <div className="summary-row total">
-                <span>Total</span>
+              <div className="cart-total-highlight">
+                <span>Total due</span>
                 <strong>${total.toFixed(2)}</strong>
               </div>
 
-              {shipping > 0 && (
-                <p className="shipping-tip">Add ${(50 - subtotal).toFixed(2)} more to unlock free shipping.</p>
+              <div className="cart-summary-breakdown">
+                <div className="summary-row">
+                  <span>Subtotal</span>
+                  <strong>${subtotal.toFixed(2)}</strong>
+                </div>
+                <div className="summary-row">
+                  <span>Shipping</span>
+                  <strong>{shipping === 0 ? 'Free' : `$${shipping.toFixed(2)}`}</strong>
+                </div>
+              </div>
+
+              {shipping > 0 ? (
+                <p className="shipping-tip">Add ${remainingForFreeShipping.toFixed(2)} more to unlock free shipping.</p>
+              ) : (
+                <p className="shipping-tip shipping-tip-success">Free shipping unlocked on this order.</p>
               )}
 
               {error && <div className="cart-error-box">{error}</div>}
 
-              <button className="cart-primary-btn full" type="button" onClick={handleCheckout} disabled={loading}>
+              <button className="cart-primary-btn full" type="button" onClick={openCheckout} disabled={loading}>
                 {loading ? 'Placing order...' : 'Checkout'}
               </button>
+
+              <p className="cart-summary-note">Your order will appear in My Orders right after checkout.</p>
             </div>
           </aside>
         </div>
+
+        {checkoutOpen && (
+          <div className="cart-checkout-overlay" role="presentation" onClick={closeCheckout}>
+            <div
+              className="cart-checkout-modal"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="cart-checkout-title"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="cart-checkout-header">
+                <div>
+                  <h2 id="cart-checkout-title">Choose how you want to pay</h2>
+                  <p>Pick a payment method before placing this order.</p>
+                </div>
+
+                <button className="cart-checkout-close" type="button" onClick={closeCheckout} aria-label="Close checkout">
+                  &times;
+                </button>
+              </div>
+
+              <div className="cart-checkout-methods" role="radiogroup" aria-label="Payment methods">
+                <button
+                  className={`cart-payment-option ${paymentMethod === 'cash' ? 'selected' : ''}`}
+                  role="radio"
+                  aria-checked={paymentMethod === 'cash'}
+                  type="button"
+                  onClick={() => {
+                    setPaymentMethod('cash')
+                    setCheckoutFormError(null)
+                  }}
+                >
+                  <span className="cart-payment-option-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none">
+                      <path
+                        d="M4 7.5A1.5 1.5 0 0 1 5.5 6h13A1.5 1.5 0 0 1 20 7.5v9A1.5 1.5 0 0 1 18.5 18h-13A1.5 1.5 0 0 1 4 16.5v-9Z"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                      />
+                      <path d="M4 10h16" stroke="currentColor" strokeWidth="1.8" />
+                      <circle cx="8" cy="14" r="1.2" fill="currentColor" />
+                    </svg>
+                  </span>
+                  <span className="cart-payment-option-body">
+                    <span className="cart-payment-option-title">Pay with cash</span>
+                    <span className="cart-payment-option-meta">Cash on delivery</span>
+                  </span>
+                  <span className="cart-payment-option-indicator" aria-hidden="true" />
+                </button>
+
+                <button
+                  className={`cart-payment-option ${paymentMethod === 'card' ? 'selected' : ''}`}
+                  role="radio"
+                  aria-checked={paymentMethod === 'card'}
+                  type="button"
+                  onClick={() => {
+                    setPaymentMethod('card')
+                    setCheckoutFormError(null)
+                  }}
+                >
+                  <span className="cart-payment-option-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none">
+                      <rect x="4" y="5.5" width="16" height="13" rx="2" stroke="currentColor" strokeWidth="1.8" />
+                      <path d="M4 9.5h16" stroke="currentColor" strokeWidth="1.8" />
+                      <path d="M8 14h3M13 14h3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                    </svg>
+                  </span>
+                  <span className="cart-payment-option-body">
+                    <span className="cart-payment-option-title">Pay with Card</span>
+                    <span className="cart-payment-option-meta">Card details</span>
+                  </span>
+                  <span className="cart-payment-option-indicator" aria-hidden="true" />
+                </button>
+              </div>
+
+              {paymentMethod === 'cash' ? (
+                <div className="cart-payment-cash-panel">
+                  <div className="cart-payment-cash-copy">
+                    <h3>Pay when the order arrives</h3>
+                    <p>No online payment is required. We will place the order and payment happens on delivery or pickup.</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="cart-payment-form">
+                  <div className="cart-payment-form-header">
+                    <div>
+                      <h3>Card information</h3>
+                      <p>Enter the payment details for this order.</p>
+                    </div>
+                  </div>
+
+                  <div className="cart-payment-field full-width">
+                    <label htmlFor="cardholderName">Cardholder name</label>
+                    <input
+                      id="cardholderName"
+                      type="text"
+                      placeholder="Name on card"
+                      value={cardholderName}
+                      onChange={(event) => setCardholderName(event.target.value)}
+                    />
+                  </div>
+
+                  <div className="cart-payment-field full-width">
+                    <label htmlFor="cardNumber">Card number</label>
+                    <input
+                      id="cardNumber"
+                      type="text"
+                      inputMode="numeric"
+                      placeholder="4242 4242 4242 4242"
+                      value={cardNumber}
+                      onChange={(event) => setCardNumber(event.target.value)}
+                    />
+                  </div>
+
+                  <div className="cart-payment-field">
+                    <label htmlFor="expiryDate">Expiry</label>
+                    <input
+                      id="expiryDate"
+                      type="text"
+                      placeholder="MM/YY"
+                      value={expiryDate}
+                      onChange={(event) => setExpiryDate(event.target.value)}
+                    />
+                  </div>
+
+                  <div className="cart-payment-field">
+                    <label htmlFor="securityCode">CVC</label>
+                    <input
+                      id="securityCode"
+                      type="text"
+                      inputMode="numeric"
+                      placeholder="123"
+                      value={securityCode}
+                      onChange={(event) => setSecurityCode(event.target.value)}
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div className="cart-checkout-summary-card">
+                <div className="cart-checkout-summary-main">
+                  <span>Order total</span>
+                  <strong>${total.toFixed(2)}</strong>
+                </div>
+
+                <div className="cart-checkout-summary-list">
+                  <div className="cart-checkout-summary-row">
+                    <span>Items</span>
+                    <strong>{itemCountLabel}</strong>
+                  </div>
+                  <div className="cart-checkout-summary-row">
+                    <span>Subtotal</span>
+                    <strong>${subtotal.toFixed(2)}</strong>
+                  </div>
+                  <div className="cart-checkout-summary-row">
+                    <span>Shipping</span>
+                    <strong>{shipping === 0 ? 'Free' : `$${shipping.toFixed(2)}`}</strong>
+                  </div>
+                </div>
+              </div>
+
+              {checkoutFormError && <div className="cart-error-box">{checkoutFormError}</div>}
+              {error && <div className="cart-error-box">{error}</div>}
+
+              <div className="cart-checkout-actions">
+                <button className="cart-secondary-btn" type="button" onClick={closeCheckout} disabled={loading}>
+                  Cancel
+                </button>
+                <button className="cart-primary-btn" type="button" onClick={handleCheckout} disabled={loading}>
+                  {loading ? 'Placing order...' : 'Place order'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </section>
   )

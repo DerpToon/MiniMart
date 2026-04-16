@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useMemo, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useCart } from '../hooks/useCart'
 import { useCategories } from '../hooks/useCategories'
 import { useProducts } from '../hooks/useProducts'
@@ -12,14 +12,37 @@ export default function CatalogPage() {
   const { categories } = useCategories()
   const { addToCart } = useCart()
   const location = useLocation()
+  const navigate = useNavigate()
+  const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search])
+  const searchTerm = searchParams.get('search') || ''
+  const categoryFilter = searchParams.get('category') || 'All'
+  const filterKey = `${searchTerm}::${categoryFilter}`
 
   const [sortBy, setSortBy] = useState<'featured' | 'low' | 'high' | 'name'>('featured')
-  const [searchTerm, setSearchTerm] = useState('')
-  const [categoryFilter, setCategoryFilter] = useState(
-    () => new URLSearchParams(location.search).get('category') || 'All'
-  )
-  const [currentPage, setCurrentPage] = useState(1)
+  const [pageState, setPageState] = useState({ filterKey: '', page: 1 })
   const productsPerPage = 12
+  const currentPage = pageState.filterKey === filterKey ? pageState.page : 1
+
+  function syncFiltersToUrl(nextSearchTerm: string, nextCategory: string) {
+    const searchParams = new URLSearchParams()
+    const trimmedSearch = nextSearchTerm.trim()
+
+    if (trimmedSearch) {
+      searchParams.set('search', trimmedSearch)
+    }
+
+    if (nextCategory !== 'All') {
+      searchParams.set('category', nextCategory)
+    }
+
+    navigate(
+      {
+        pathname: '/catalog',
+        search: searchParams.toString() ? `?${searchParams.toString()}` : ''
+      },
+      { replace: true }
+    )
+  }
 
   function handleAddToCart(product: {
     id: string | number
@@ -45,18 +68,18 @@ export default function CatalogPage() {
   }, [categories])
 
   function handleCategoryChange(category: string) {
-    setCategoryFilter(category)
-    setCurrentPage(1)
+    setPageState({ filterKey: `${searchTerm}::${category}`, page: 1 })
+    syncFiltersToUrl(searchTerm, category)
   }
 
   function handleSortChange(value: typeof sortBy) {
     setSortBy(value)
-    setCurrentPage(1)
+    setPageState({ filterKey, page: 1 })
   }
 
   function handleSearchChange(value: string) {
-    setSearchTerm(value)
-    setCurrentPage(1)
+    setPageState({ filterKey: `${value}::${categoryFilter}`, page: 1 })
+    syncFiltersToUrl(value, categoryFilter)
   }
 
   const filteredAndSortedProducts = useMemo(() => {
@@ -84,20 +107,11 @@ export default function CatalogPage() {
   }, [products, searchTerm, sortBy, categoryFilter])
 
   const totalPages = Math.max(1, Math.ceil(filteredAndSortedProducts.length / productsPerPage))
+  const activePage = Math.min(currentPage, totalPages)
   const currentProducts = filteredAndSortedProducts.slice(
-    (currentPage - 1) * productsPerPage,
-    currentPage * productsPerPage
+    (activePage - 1) * productsPerPage,
+    activePage * productsPerPage
   )
-
-  useEffect(() => {
-    if (currentPage > totalPages) {
-      setCurrentPage(totalPages)
-    }
-  }, [currentPage, totalPages])
-
-  useEffect(() => {
-    setCurrentPage(1)
-  }, [searchTerm, categoryFilter, sortBy])
 
   if (loading) {
     return (
@@ -122,14 +136,9 @@ export default function CatalogPage() {
   return (
     <section className="catalog-page">
       <div className="catalog-container">
-        <header
-          className="catalog-hero"
-          style={{
-            backgroundImage: `url(${heroBackground})`
-          }}
-        >
+        <header className="catalog-hero">
+          <img src={heroBackground} alt="" aria-hidden="true" className="catalog-hero-bg" />
           <div className="catalog-hero-copy">
-            <p className="catalog-kicker">Our products</p>
             <h1>Fresh groceries for your everyday shopping</h1>
             <p className="catalog-description">
               Browse fruits, vegetables, dairy, bakery items, and pantry essentials all in one
@@ -209,8 +218,8 @@ export default function CatalogPage() {
               <button
                 type="button"
                 className="catalog-page-btn"
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+                disabled={activePage === 1}
+                onClick={() => setPageState({ filterKey, page: Math.max(1, activePage - 1) })}
               >
                 Previous
               </button>
@@ -220,8 +229,8 @@ export default function CatalogPage() {
                   <button
                     key={index + 1}
                     type="button"
-                    className={`catalog-page-number ${currentPage === index + 1 ? 'active' : ''}`}
-                    onClick={() => setCurrentPage(index + 1)}
+                    className={`catalog-page-number ${activePage === index + 1 ? 'active' : ''}`}
+                    onClick={() => setPageState({ filterKey, page: index + 1 })}
                   >
                     {index + 1}
                   </button>
@@ -231,8 +240,10 @@ export default function CatalogPage() {
               <button
                 type="button"
                 className="catalog-page-btn"
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+                disabled={activePage === totalPages}
+                onClick={() =>
+                  setPageState({ filterKey, page: Math.min(totalPages, activePage + 1) })
+                }
               >
                 Next
               </button>

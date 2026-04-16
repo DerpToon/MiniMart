@@ -111,21 +111,9 @@ export default function AboutPage() {
   return (
     <section className="about-page">
       <div className="about-shell">
-        <header
-          className="about-hero"
-          style={{
-            backgroundImage: `linear-gradient(
-              90deg,
-              rgba(9, 34, 26, 0.82) 0%,
-              rgba(10, 40, 30, 0.72) 34%,
-              rgba(11, 45, 34, 0.48) 62%,
-              rgba(11, 45, 34, 0.2) 100%
-            ), url(${aboutHeroImage})`,
-            backgroundPosition: 'center center'
-          }}
-        >
+        <header className="about-hero">
+          <img src={aboutHeroImage} alt="" aria-hidden="true" className="about-hero-bg" />
           <div className="about-hero-copy">
-            <p className="about-kicker">About MiniMart</p>
             <h1>Fresh groceries, fast delivery, and everyday essentials from MiniMart.</h1>
             <p>
               MiniMart is your neighborhood grocery shop for fresh food, pantry basics, and the

@@ -49,22 +49,9 @@ export default function ContactPage() {
   return (
     <section className="contact-page">
       <div className="contact-shell">
-        <header
-          className="contact-hero"
-          style={{
-            backgroundImage: `linear-gradient(
-              90deg,
-              rgba(9, 33, 25, 0.78) 0%,
-              rgba(11, 39, 30, 0.66) 32%,
-              rgba(12, 44, 34, 0.44) 58%,
-              rgba(12, 44, 34, 0.2) 80%,
-              rgba(12, 44, 34, 0.08) 100%
-            ), url(${contactHeroImage})`,
-            backgroundPosition: 'center center'
-          }}
-        >
+        <header className="contact-hero">
+          <img src={contactHeroImage} alt="" aria-hidden="true" className="contact-hero-bg" />
           <div className="contact-hero-copy">
-            <p className="contact-kicker">Contact us</p>
             <h1>Questions about an order or today&apos;s groceries? Contact MiniMart.</h1>
             <p>
               Whether you need help with delivery, want to ask about product availability, or just have

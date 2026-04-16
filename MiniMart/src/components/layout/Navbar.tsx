@@ -1,5 +1,5 @@
-import { Link, NavLink } from 'react-router-dom'
-import { useState } from 'react'
+import { useState, type FormEvent } from 'react'
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 import { useProfile } from '../../hooks/useProfile'
 import { useCart } from '../../hooks/useCart'
@@ -10,6 +10,11 @@ export default function Navbar() {
   const { profile } = useProfile()
   const { cart } = useCart()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const location = useLocation()
+  const navigate = useNavigate()
+  const currentSearch = location.pathname === '/catalog'
+    ? new URLSearchParams(location.search).get('search') || ''
+    : ''
 
   const totalCartItems = cart.reduce((sum, item) => sum + item.quantity, 0)
 
@@ -32,6 +37,25 @@ export default function Navbar() {
     }
   }
 
+  function handleSearchSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+
+    const formData = new FormData(event.currentTarget)
+    const searchParams = new URLSearchParams(location.pathname === '/catalog' ? location.search : '')
+    const trimmedQuery = String(formData.get('search') || '').trim()
+
+    if (trimmedQuery) {
+      searchParams.set('search', trimmedQuery)
+    } else {
+      searchParams.delete('search')
+    }
+
+    navigate({
+      pathname: '/catalog',
+      search: searchParams.toString() ? `?${searchParams.toString()}` : ''
+    })
+  }
+
   return (
     <header className="site-navbar">
       <div className="navbar-shell">
@@ -47,43 +71,55 @@ export default function Navbar() {
         </Link>
 
         <nav className="navbar-links">
-            <NavLink to="/" end className={({ isActive }) => `nav-pill ${isActive ? 'active' : ''}`}>
-              Home
-            </NavLink>
+          <NavLink to="/" end className={({ isActive }) => `nav-pill ${isActive ? 'active' : ''}`}>
+            Home
+          </NavLink>
 
-            <NavLink to="/catalog" className={({ isActive }) => `nav-pill ${isActive ? 'active' : ''}`}>
-              Catalog
-            </NavLink>
+          <NavLink to="/catalog" className={({ isActive }) => `nav-pill ${isActive ? 'active' : ''}`}>
+            Catalog
+          </NavLink>
 
-            <NavLink to="/about" className={({ isActive }) => `nav-pill ${isActive ? 'active' : ''}`}>
-              About
-            </NavLink>
+          <NavLink to="/about" className={({ isActive }) => `nav-pill ${isActive ? 'active' : ''}`}>
+            About
+          </NavLink>
 
-            <NavLink to="/contact" className={({ isActive }) => `nav-pill ${isActive ? 'active' : ''}`}>
-              Contact
-            </NavLink>
+          <NavLink to="/contact" className={({ isActive }) => `nav-pill ${isActive ? 'active' : ''}`}>
+            Contact
+          </NavLink>
 
-            {user && (
-              <NavLink to="/orders" className={({ isActive }) => `nav-pill ${isActive ? 'active' : ''}`}>
-                My Orders
-              </NavLink>
-            )}
+          {user && (
+            <NavLink to="/orders" className={({ isActive }) => `nav-pill ${isActive ? 'active' : ''}`}>
+              My Orders
+            </NavLink>
+          )}
         </nav>
 
         <div className="navbar-right">
-          <div className="navbar-search-shell">
-            <span className="search-icon">⌕</span>
+          <form
+            key={`${location.pathname}:${currentSearch}`}
+            className="navbar-search-shell"
+            onSubmit={handleSearchSubmit}
+          >
+            <button type="submit" className="navbar-search-submit" aria-label="Search products">
+              <span className="search-icon" aria-hidden="true">
+                ?
+              </span>
+            </button>
             <input
+              name="search"
               type="text"
               className="navbar-search-input"
               placeholder="Search products..."
-              aria-label="Search"
+              defaultValue={currentSearch}
+              aria-label="Search products"
             />
-          </div>
+          </form>
 
           {user ? (
             <Link to="/cart" className="cart-button" aria-label="Go to cart">
-              <span className="cart-emoji">🛒</span>
+              <span className="cart-emoji" aria-hidden="true">
+                ??
+              </span>
               <span className="cart-label">Cart</span>
               {totalCartItems > 0 && <span className="cart-count">{totalCartItems}</span>}
             </Link>

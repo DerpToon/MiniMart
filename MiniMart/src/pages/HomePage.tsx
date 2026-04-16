@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react'
+import { useEffect, useState, type CSSProperties } from 'react'
 import { Link } from 'react-router-dom'
 import { useCart } from '../hooks/useCart'
 import { useProducts } from '../hooks/useProducts'
@@ -92,6 +92,11 @@ const categoryMeta: Record<
   }
 }
 
+const heroTypingOptions = ['simple', 'quick', 'easy to use', 'stress-free'] as const
+const longestHeroTypingOption = heroTypingOptions.reduce((longest, option) =>
+  option.length > longest.length ? option : longest
+)
+
 function buildCategoryCard(title: string): CategoryCard {
   const meta = categoryMeta[title] ?? {
     text: `Browse ${title.toLowerCase()}`,
@@ -114,6 +119,39 @@ export default function HomePage() {
   const { products, loading, error } = useProducts()
   const { categories: dbCategories } = useCategories()
   const { addToCart } = useCart()
+  const [typedWordIndex, setTypedWordIndex] = useState(0)
+  const [typedWord, setTypedWord] = useState('')
+  const [isDeletingWord, setIsDeletingWord] = useState(false)
+
+  useEffect(() => {
+    const currentWord = heroTypingOptions[typedWordIndex]
+    const isWordComplete = typedWord === currentWord
+    const isWordEmpty = typedWord.length === 0
+
+    const delay = isWordComplete && !isDeletingWord ? 1200 : isDeletingWord ? 42 : 88
+
+    const timeoutId = window.setTimeout(() => {
+      if (!isDeletingWord && !isWordComplete) {
+        setTypedWord(currentWord.slice(0, typedWord.length + 1))
+        return
+      }
+
+      if (!isDeletingWord && isWordComplete) {
+        setIsDeletingWord(true)
+        return
+      }
+
+      if (isDeletingWord && !isWordEmpty) {
+        setTypedWord(currentWord.slice(0, typedWord.length - 1))
+        return
+      }
+
+      setIsDeletingWord(false)
+      setTypedWordIndex((currentIndex) => (currentIndex + 1) % heroTypingOptions.length)
+    }, delay)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [isDeletingWord, typedWord, typedWordIndex])
 
   const categories: CategoryCard[] =
     dbCategories.length > 0
@@ -145,18 +183,29 @@ export default function HomePage() {
       <div className="home-container">
         <section
           className="hero-panel"
-          style={{
-            backgroundImage: `linear-gradient(
-              90deg,
-              rgba(7, 27, 23, 0.88) 0%,
-              rgba(10, 38, 32, 0.76) 34%,
-              rgba(12, 45, 37, 0.42) 62%,
-              rgba(12, 45, 37, 0.16) 100%
-            ), url(${heroBackground})`
-          }}
         >
+          <img src={heroBackground} alt="" aria-hidden="true" className="hero-panel-bg" />
           <div className="hero-copy">
-            <h1>Fresh shopping made simple, quick, and easy to use.</h1>
+            <h1 aria-label={`Fresh shopping made ${heroTypingOptions[typedWordIndex]}.`}>
+              <span className="hero-heading-static">Fresh shopping</span>
+              <span className="hero-heading-static">made</span>
+              <span
+                className="hero-heading-dynamic"
+                style={
+                  {
+                    '--hero-typed-width': `${Math.max(longestHeroTypingOption.length, 12)}ch`
+                  } as CSSProperties
+                }
+              >
+                <span className="hero-typed-placeholder" aria-hidden="true">
+                  {longestHeroTypingOption}
+                </span>
+                <span className="hero-typed-live" aria-hidden="true">
+                  <span className="hero-typed-word">{typedWord}</span>
+                  <span className="hero-caret" />
+                </span>
+              </span>
+            </h1>
 
             <p>
               Browse products, add them to cart, place orders, and manage inventory in a cleaner,
