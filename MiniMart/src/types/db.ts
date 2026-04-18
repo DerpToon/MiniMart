@@ -8,14 +8,14 @@ export type Profile = {
 export type ProfileFormData = {
   full_name: string
   email: string
-  new_password: string
-  confirm_password: string
+  phone: string
 }
 
 export type ProfileView = {
   id: string
   full_name: string | null
   email: string
+  phone: string | null
   role: 'customer' | 'admin'
   created_at: string
 }

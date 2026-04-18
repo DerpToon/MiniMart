@@ -11,6 +11,11 @@
   align-items: stretch;
 }
 
+.auth-layout-single {
+  width: min(720px, calc(100% - 32px));
+  grid-template-columns: 1fr;
+}
+
 .auth-side-panel,
 .auth-card {
   border-radius: 30px;
@@ -99,6 +104,18 @@
 .auth-field input:focus {
   border-color: #b5cdbd;
   box-shadow: 0 0 0 4px rgba(27, 107, 89, 0.08);
+}
+
+.auth-assist-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -0.15rem;
+}
+
+.auth-inline-link {
+  color: var(--primary-dark);
+  font-weight: 700;
+  text-decoration: none;
 }
 
 .auth-submit {

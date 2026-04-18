@@ -15,8 +15,8 @@ export default function Footer() {
             </div>
 
             <p className="footer-copy">
-              A friendly grocery storefront with product browsing, cart management, order tracking,
-              and admin tools for inventory and order control.
+              Your neighborhood shop for fresh produce, pantry staples, bakery picks, and everyday
+              essentials, ready whenever you need a quick and reliable grocery run.
             </p>
           </div>
 
@@ -38,12 +38,7 @@ export default function Footer() {
 
       <section className="footer-bottom">
         <div className="footer-inner footer-bottom-row">
-          <p>© {new Date().getFullYear()} MiniMart.</p>
-          <div className="footer-bottom-links">
-            <Link to="/">Privacy</Link>
-            <span>•</span>
-            <Link to="/">Support</Link>
-          </div>
+          <p>&copy; {new Date().getFullYear()} MiniMart.</p>
         </div>
       </section>
     </footer>

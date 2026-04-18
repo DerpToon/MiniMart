@@ -4,6 +4,8 @@ import App from '../App'
 import HomePage from '../pages/HomePage'
 import LoginPage from '../pages/LoginPage'
 import RegisterPage from '../pages/RegisterPage'
+import ForgotPasswordPage from '../pages/ForgotPasswordPage'
+import ResetPasswordPage from '../pages/ResetPasswordPage'
 import CatalogPage from '../pages/CatalogPage'
 import ProductDetailsPage from '../pages/ProductDetailsPage.tsx'
 import OrdersPage from '../pages/OrdersPage'
@@ -44,6 +46,8 @@ export const router = createBrowserRouter([
           </GuestOnlyRoute>
         )
       },
+      { path: 'forgot-password', element: <ForgotPasswordPage /> },
+      { path: 'reset-password', element: <ResetPasswordPage /> },
 
       { path: 'catalog', element: <CatalogPage /> },
       { path: 'products/:productId', element: <ProductDetailsPage /> },

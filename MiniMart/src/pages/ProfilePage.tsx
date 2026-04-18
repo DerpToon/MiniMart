@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react'
 import type { ProfileFormData, ProfileView } from '../types/db'
 import { getMyProfileView, updateMyProfile } from '../Services/ProfileService'
+import { requestPasswordResetEmail } from '../Services/AuthService'
 import { getErrorMessage } from '../lib/error'
 import '../css/ProfilePage.css'
 
 const initialForm: ProfileFormData = {
   full_name: '',
   email: '',
-  new_password: '',
-  confirm_password: ''
+  phone: ''
 }
 
 export default function ProfilePage() {
@@ -16,6 +16,7 @@ export default function ProfilePage() {
   const [form, setForm] = useState<ProfileFormData>(initialForm)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [sendingPasswordEmail, setSendingPasswordEmail] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
 
@@ -30,8 +31,7 @@ export default function ProfilePage() {
         setForm({
           full_name: data.full_name ?? '',
           email: data.email,
-          new_password: '',
-          confirm_password: ''
+          phone: data.phone ?? ''
         })
       } catch (error: unknown) {
         setError(getErrorMessage(error, 'Failed to load profile.'))
@@ -43,28 +43,18 @@ export default function ProfilePage() {
     loadProfile()
   }, [])
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const { name, value } = e.target
-    setForm((prev) => ({
-      ...prev,
+  function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const { name, value } = event.target
+    setForm((previous) => ({
+      ...previous,
       [name]: value
     }))
   }
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
     setError('')
     setSuccess('')
-
-    if (form.new_password && form.new_password.length < 6) {
-      setError('New password must be at least 6 characters.')
-      return
-    }
-
-    if (form.new_password !== form.confirm_password) {
-      setError('Passwords do not match.')
-      return
-    }
 
     try {
       setSaving(true)
@@ -72,24 +62,45 @@ export default function ProfilePage() {
       const updatedProfile = await updateMyProfile({
         full_name: form.full_name,
         email: form.email,
-        new_password: form.new_password || undefined
+        phone: form.phone
       })
 
       setProfile(updatedProfile)
       setForm({
         full_name: updatedProfile.full_name ?? '',
         email: updatedProfile.email,
-        new_password: '',
-        confirm_password: ''
+        phone: updatedProfile.phone ?? ''
       })
 
       setSuccess(
-        'Profile updated successfully. If you changed your email, check your inbox for confirmation.'
+        'Profile updated successfully. If you changed your email, check your inbox for the confirmation link.'
       )
     } catch (error: unknown) {
       setError(getErrorMessage(error, 'Failed to update profile.'))
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function handlePasswordResetEmail() {
+    const accountEmail = profile?.email?.trim()
+
+    if (!accountEmail) {
+      setError('No account email is available for password reset.')
+      setSuccess('')
+      return
+    }
+
+    try {
+      setSendingPasswordEmail(true)
+      setError('')
+      setSuccess('')
+      await requestPasswordResetEmail(accountEmail)
+      setSuccess(`Password reset email sent to ${accountEmail}. Check your inbox for the reset link.`)
+    } catch (error: unknown) {
+      setError(getErrorMessage(error, 'Failed to send password reset email.'))
+    } finally {
+      setSendingPasswordEmail(false)
     }
   }
 
@@ -136,7 +147,7 @@ export default function ProfilePage() {
             <div className="profile-card-header">
               <div>
                 <h2>Edit profile</h2>
-                <p>Update your name, email, or password.</p>
+                <p>Update your name, email, or phone number. Password changes are handled through email.</p>
               </div>
             </div>
 
@@ -168,24 +179,13 @@ export default function ProfilePage() {
                 </label>
 
                 <label className="profile-field">
-                  <span>New password</span>
+                  <span>Phone number</span>
                   <input
-                    type="password"
-                    name="new_password"
-                    value={form.new_password}
+                    type="tel"
+                    name="phone"
+                    value={form.phone}
                     onChange={handleChange}
-                    placeholder="Leave blank to keep current password"
-                  />
-                </label>
-
-                <label className="profile-field">
-                  <span>Confirm password</span>
-                  <input
-                    type="password"
-                    name="confirm_password"
-                    value={form.confirm_password}
-                    onChange={handleChange}
-                    placeholder="Confirm your new password"
+                    placeholder="Use international format, like +961..."
                   />
                 </label>
               </div>
@@ -194,7 +194,20 @@ export default function ProfilePage() {
                 <button className="profile-save-button" type="submit" disabled={saving}>
                   {saving ? 'Saving...' : 'Save changes'}
                 </button>
+
+                <button
+                  className="profile-secondary-button"
+                  type="button"
+                  onClick={handlePasswordResetEmail}
+                  disabled={sendingPasswordEmail}
+                >
+                  {sendingPasswordEmail ? 'Sending email...' : 'Change password'}
+                </button>
               </div>
+
+              <p className="profile-password-note">
+                We&apos;ll send the password reset link to your current account email.
+              </p>
             </form>
           </section>
 
@@ -210,6 +223,11 @@ export default function ProfilePage() {
               <div className="profile-summary-item">
                 <span>Email</span>
                 <strong>{profile?.email || '—'}</strong>
+              </div>
+
+              <div className="profile-summary-item">
+                <span>Phone</span>
+                <strong>{profile?.phone || 'Not set'}</strong>
               </div>
 
               <div className="profile-summary-item">
@@ -233,3 +251,5 @@ export default function ProfilePage() {
     </div>
   )
 }
+
+

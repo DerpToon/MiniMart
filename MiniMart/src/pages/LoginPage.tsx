@@ -74,6 +74,12 @@ export default function LoginPage() {
               />
             </label>
 
+            <div className="auth-assist-row">
+              <Link to="/forgot-password" className="auth-inline-link">
+                Forgot password?
+              </Link>
+            </div>
+
             <button className="auth-submit" type="submit" disabled={loading}>
               {loading ? 'Logging in...' : 'Login'}
             </button>

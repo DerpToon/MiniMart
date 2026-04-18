@@ -10,13 +10,15 @@
 .footer-main {
   background: linear-gradient(180deg, #10332c, #0c2823);
   color: white;
-  padding: 3rem 0 2.2rem;
+  padding: 2.7rem 0 2.05rem;
 }
 
 .footer-main-grid {
   display: grid;
-  grid-template-columns: 1.6fr 1fr 1fr;
-  gap: 2rem;
+  grid-template-columns: minmax(320px, 1.45fr) repeat(2, minmax(140px, 180px));
+  justify-content: space-between;
+  align-items: start;
+  gap: clamp(1.5rem, 4vw, 4.5rem);
 }
 
 .footer-brand-row {
@@ -40,21 +42,29 @@
 }
 
 .footer-copy {
-  margin-top: 1.2rem;
-  max-width: 420px;
+  margin: 1rem 0 0;
+  max-width: 480px;
   line-height: 1.7;
   color: #d5e4dc;
+  font-size: 1rem;
 }
 
 .footer-links-block {
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
+  align-items: flex-start;
+  gap: 0.8rem;
+  min-width: 0;
+}
+
+.footer-links-block h4 {
+  margin-bottom: 0.3rem;
 }
 
 .footer-links-block a {
   color: #cfe1d8;
   text-decoration: none;
+  line-height: 1.5;
 }
 
 .footer-links-block a:hover {
@@ -64,7 +74,7 @@
 .footer-bottom {
   background: #0a221d;
   color: #bfd5cb;
-  padding: 10px;
+  padding: 0.95rem 0;
 }
 
 .footer-bottom-row {
@@ -72,6 +82,10 @@
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
+}
+
+.footer-bottom-row p {
+  margin: 0;
 }
 
 .footer-bottom-links {
@@ -86,22 +100,82 @@
 }
 
 @media (max-width: 980px) {
+  .site-footer {
+    margin-top: 48px;
+  }
+
+  .footer-main {
+    padding: 2.2rem 0 1.8rem;
+  }
+
   .footer-main-grid {
     grid-template-columns: 1fr 1fr;
+    justify-content: start;
+    gap: 1.6rem 2rem;
   }
 
   .footer-brand-block {
     grid-column: 1 / -1;
   }
+
+  .footer-copy {
+    max-width: 100%;
+  }
 }
 
 @media (max-width: 640px) {
+  .site-footer {
+    margin-top: 36px;
+  }
+
+  .footer-inner {
+    width: min(100%, calc(100% - 24px));
+  }
+
+  .footer-main {
+    padding: 1.7rem 0 1.45rem;
+  }
+
   .footer-main-grid {
     grid-template-columns: 1fr;
+    gap: 1.3rem;
+  }
+
+  .footer-brand-row {
+    gap: 0.85rem;
+  }
+
+  .footer-brand-row img {
+    width: 48px;
+    height: 48px;
+    border-radius: 15px;
+  }
+
+  .footer-brand-row h2 {
+    font-size: 1.8rem;
+  }
+
+  .footer-copy {
+    margin-top: 0.8rem;
+    line-height: 1.65;
+    font-size: 0.96rem;
+  }
+
+  .footer-links-block {
+    gap: 0.6rem;
+  }
+
+  .footer-links-block h4 {
+    margin-bottom: 0.15rem;
   }
 
   .footer-bottom-row {
     flex-direction: column;
     text-align: center;
+    gap: 0.45rem;
+  }
+
+  .footer-bottom {
+    padding: 0.8rem 0;
   }
 }

@@ -38,6 +38,25 @@ export async function resendVerificationEmail(email: string) {
   return data
 }
 
+export async function requestPasswordResetEmail(email: string) {
+  const redirectTo = `${window.location.origin}/reset-password`
+  const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo
+  })
+
+  if (error) throw error
+  return data
+}
+
+export async function updatePassword(newPassword: string) {
+  const { data, error } = await supabase.auth.updateUser({
+    password: newPassword
+  })
+
+  if (error) throw error
+  return data
+}
+
 export async function signOutUser() {
   const { error } = await supabase.auth.signOut()
 

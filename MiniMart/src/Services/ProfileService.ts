@@ -4,7 +4,7 @@ import type { ProductReview, Profile, ProfileView } from '../types/db'
 type UpdateMyProfileInput = {
   full_name: string
   email: string
-  new_password?: string
+  phone: string
 }
 export async function getProfile(): Promise<Profile | null> {
   const {
@@ -85,6 +85,7 @@ export async function getMyProfileView(): Promise<ProfileView> {
     id: user.id,
     full_name: profile?.full_name ?? null,
     email: user.email ?? '',
+    phone: typeof user.user_metadata?.phone === 'string' ? user.user_metadata.phone : null,
     role: profile?.role ?? 'customer',
     created_at: profile?.created_at ?? user.created_at ?? ''
   }
@@ -93,7 +94,7 @@ export async function getMyProfileView(): Promise<ProfileView> {
 export async function updateMyProfile({
   full_name,
   email,
-  new_password
+  phone
 }: UpdateMyProfileInput): Promise<ProfileView> {
   const {
     data: { user },
@@ -105,7 +106,7 @@ export async function updateMyProfile({
 
   const trimmedName = full_name.trim()
   const trimmedEmail = email.trim()
-  const trimmedPassword = new_password?.trim() ?? ''
+  const trimmedPhone = phone.trim()
 
   const { error: profileError } = await supabase
     .from('profiles')
@@ -116,14 +117,23 @@ export async function updateMyProfile({
 
   if (profileError) throw profileError
 
-  const authUpdates: { email?: string; password?: string } = {}
+  const currentPhone =
+    typeof user.user_metadata?.phone === 'string' ? user.user_metadata.phone.trim() : ''
+
+  const authUpdates: {
+    email?: string
+    data?: Record<string, unknown>
+  } = {}
 
   if (trimmedEmail && trimmedEmail !== user.email) {
     authUpdates.email = trimmedEmail
   }
 
-  if (trimmedPassword) {
-    authUpdates.password = trimmedPassword
+  if (trimmedPhone !== currentPhone) {
+    authUpdates.data = {
+      ...(user.user_metadata ?? {}),
+      phone: trimmedPhone || null
+    }
   }
 
   if (Object.keys(authUpdates).length > 0) {

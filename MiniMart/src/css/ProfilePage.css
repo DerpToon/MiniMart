@@ -189,14 +189,39 @@
   transition: all 0.2s;
 }
 
+.profile-secondary-button {
+  padding: 0.85rem 1.5rem;
+  border: 1px solid #cfe0d7;
+  border-radius: 34px;
+  background: white;
+  color: var(--primary-dark);
+  font-weight: 800;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
 .profile-save-button:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);
 }
 
-.profile-save-button:disabled {
+.profile-secondary-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  border-color: #a9cbbb;
+  box-shadow: 0 4px 12px rgba(16, 61, 45, 0.08);
+}
+
+.profile-save-button:disabled,
+.profile-secondary-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.profile-password-note {
+  margin: 0.95rem 0 0;
+  color: var(--text-soft);
+  font-size: 0.94rem;
 }
 
 .profile-summary {
