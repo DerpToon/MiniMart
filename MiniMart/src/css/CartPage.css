@@ -305,9 +305,6 @@
     opacity: 0;
     transform: translateY(-10px);
   }
-  background: #fff1f1;
-  color: #b42318;
-}
 
 .cart-primary-btn {
   border: none;
